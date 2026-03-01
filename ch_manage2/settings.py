@@ -85,6 +85,7 @@ PROJECT_APPS = [
     "apps.chat",
     "apps.ai.apps.AiConfig",
     "apps.events.apps.EventsConfig",
+    "apps.notifications.apps.NotificationsConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
@@ -432,13 +433,26 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Add tasks to this dict and run `python manage.py bootstrap_celery_tasks` to create them
 SCHEDULED_TASKS: dict[str, Any] = {
-    # Example of a crontab schedule
-    # from celery import schedules
-    # "daily-4am-task": {
-    #     "task": "some.task.path",
-    #     "schedule": schedules.crontab(minute=0, hour=4),
-    # },
+    "send-scheduled-blasts": {
+        "task": "apps.notifications.tasks.send_scheduled_blasts",
+        "schedule": 300,  # every 5 minutes
+    },
 }
+
+# Notification backends
+NOTIFICATION_EMAIL_BACKEND = env(
+    "NOTIFICATION_EMAIL_BACKEND",
+    default="apps.notifications.backends.email_backend.DjangoEmailBackend",
+)
+NOTIFICATION_SMS_BACKEND = env(
+    "NOTIFICATION_SMS_BACKEND",
+    default="apps.notifications.backends.console_backend.ConsoleBackend",
+)
+
+# Twilio settings (required only when using TwilioBackend)
+TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID", default="")
+TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN", default="")
+TWILIO_FROM_NUMBER = env("TWILIO_FROM_NUMBER", default="")
 
 # Channels / Daphne setup
 

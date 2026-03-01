@@ -1,0 +1,40 @@
+{% load i18n %}
+{# Reusable blast card for list views #}
+<div class="card bg-base-200 hover:shadow-md transition-shadow">
+  <div class="card-body p-4">
+    <div class="flex justify-between items-start">
+      <div>
+        <a href="{% url 'notifications:blast_detail' team.slug blast.pk %}" class="text-lg font-semibold link link-hover">
+          {{ blast }}
+        </a>
+        <div class="flex items-center gap-3 mt-1 text-sm text-base-content/60">
+          <span><i class="fa fa-clock mr-1"></i> {{ blast.created_at|date:"N j, Y g:i A" }}</span>
+          {% if blast.created_by %}
+          <span><i class="fa fa-user mr-1"></i> {{ blast.created_by.get_display_name }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        {% include "notifications/components/channel_selector.html" with channel=blast.channel readonly=True %}
+        {% if blast.status == 'draft' %}
+          <span class="badge badge-warning">{% translate "Draft" %}</span>
+        {% elif blast.status == 'sending' %}
+          <span class="badge badge-info">{% translate "Sending" %}</span>
+        {% elif blast.status == 'sent' %}
+          <span class="badge badge-success">{% translate "Sent" %}</span>
+        {% elif blast.status == 'failed' %}
+          <span class="badge badge-error">{% translate "Failed" %}</span>
+        {% endif %}
+      </div>
+    </div>
+    {% if blast.body %}
+    <p class="text-sm text-base-content/70 mt-2 line-clamp-2">{{ blast.body }}</p>
+    {% endif %}
+    <div class="flex items-center gap-4 mt-2 text-sm text-base-content/60">
+      <span><i class="fa fa-users mr-1"></i> {{ blast.recipient_count }} {% translate "recipients" %}</span>
+      {% if blast.sent_at %}
+      <span><i class="fa fa-check mr-1"></i> {{ blast.sent_count }} {% translate "sent" %}</span>
+      {% endif %}
+    </div>
+  </div>
+</div>

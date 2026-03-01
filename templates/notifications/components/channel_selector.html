@@ -1,0 +1,11 @@
+{% load i18n %}
+{# Channel badge — readonly display of the notification channel #}
+{% if channel == 'email' %}
+<span class="badge badge-outline gap-1">
+  <i class="fa fa-envelope"></i> {% translate "Email" %}
+</span>
+{% elif channel == 'sms' %}
+<span class="badge badge-outline gap-1">
+  <i class="fa fa-comment-sms"></i> {% translate "SMS" %}
+</span>
+{% endif %}

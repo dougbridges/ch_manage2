@@ -1,0 +1,7 @@
+{% if blast.subject %}{{ blast.subject }}
+{% endif %}
+{{ blast.body }}
+
+--
+You received this message from {{ blast.team }}.
+To manage your notification preferences, visit your account settings.

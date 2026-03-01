@@ -31,6 +31,12 @@
     {% translate "Calendar" %}
   </a>
 </li>
+<li>
+  <a href="{% url 'notifications:blast_list' team.slug %}" {% if active_tab == 'notifications' %}class="menu-active"{% endif %}>
+    <i class="fa fa-bell h-4 w-4"></i>
+    {% translate "Notifications" %}
+  </a>
+</li>
 {% endif %}
 {% if not user.is_anonymous %}
 <li class="menu-title">

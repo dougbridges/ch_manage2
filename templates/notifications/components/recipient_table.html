@@ -1,0 +1,50 @@
+{% load i18n %}
+{# Recipient delivery status table #}
+{% if recipients %}
+<div class="overflow-x-auto">
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th>{% translate "Recipient" %}</th>
+        <th>{% translate "Channel" %}</th>
+        <th>{% translate "Status" %}</th>
+        <th>{% translate "Sent At" %}</th>
+        <th>{% translate "Details" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for recipient in recipients %}
+      <tr>
+        <td>{{ recipient.user.get_display_name }}</td>
+        <td>
+          {% if recipient.channel == 'email' %}
+          <span class="badge badge-sm badge-outline"><i class="fa fa-envelope mr-1"></i> {% translate "Email" %}</span>
+          {% elif recipient.channel == 'sms' %}
+          <span class="badge badge-sm badge-outline"><i class="fa fa-comment-sms mr-1"></i> {% translate "SMS" %}</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if recipient.status == 'pending' %}
+            <span class="badge badge-sm badge-ghost">{% translate "Pending" %}</span>
+          {% elif recipient.status == 'sent' %}
+            <span class="badge badge-sm badge-info">{% translate "Sent" %}</span>
+          {% elif recipient.status == 'delivered' %}
+            <span class="badge badge-sm badge-success">{% translate "Delivered" %}</span>
+          {% elif recipient.status == 'failed' %}
+            <span class="badge badge-sm badge-error">{% translate "Failed" %}</span>
+          {% elif recipient.status == 'bounced' %}
+            <span class="badge badge-sm badge-warning">{% translate "Bounced" %}</span>
+          {% endif %}
+        </td>
+        <td>{{ recipient.sent_at|date:"N j, Y g:i A"|default:"-" }}</td>
+        <td class="max-w-xs truncate">{{ recipient.error_message|default:"-" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="text-center py-8">
+  <p class="text-base-content/60">{% translate "No recipients yet." %}</p>
+</div>
+{% endif %}

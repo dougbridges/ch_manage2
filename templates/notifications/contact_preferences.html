@@ -1,0 +1,58 @@
+{% extends "web/app/app_base.html" %}
+{% load i18n %}
+{% block app %}
+<div class="px-4 py-6 max-w-lg">
+  <div class="text-sm breadcrumbs mb-4">
+    <ul>
+      <li><a href="{% url 'notifications:blast_list' team.slug %}">{% translate "Notifications" %}</a></li>
+      <li>{% translate "My Preferences" %}</li>
+    </ul>
+  </div>
+
+  <h1 class="text-2xl font-bold mb-6">{% translate "Notification Preferences" %}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-error mb-4">
+      {% for error in form.non_field_errors %}
+      <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="form-control mb-4">
+      <label class="label cursor-pointer justify-start gap-3">
+        {{ form.receive_email }}
+        <span class="label-text">{% translate "Receive email notifications" %}</span>
+      </label>
+    </div>
+
+    <div class="form-control mb-4">
+      <label class="label cursor-pointer justify-start gap-3">
+        {{ form.receive_sms }}
+        <span class="label-text">{% translate "Receive SMS notifications" %}</span>
+      </label>
+    </div>
+
+    <div class="form-control mb-4">
+      <label class="label" for="{{ form.phone_number.id_for_label }}">
+        <span class="label-text font-medium">{% translate "Phone Number (E.164 format)" %}</span>
+      </label>
+      {{ form.phone_number }}
+      {% if form.phone_number.errors %}
+      <label class="label">
+        {% for error in form.phone_number.errors %}
+        <span class="label-text-alt text-error">{{ error }}</span>
+        {% endfor %}
+      </label>
+      {% endif %}
+    </div>
+
+    <div class="flex gap-2 mt-6">
+      <button type="submit" class="btn btn-primary">{% translate "Save Preferences" %}</button>
+      <a href="{% url 'notifications:blast_list' team.slug %}" class="btn btn-ghost">{% translate "Back" %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

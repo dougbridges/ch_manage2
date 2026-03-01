@@ -1,0 +1,72 @@
+{% extends "web/app/app_base.html" %}
+{% load i18n %}
+{% block app %}
+<div class="px-4 py-6">
+  <div class="text-sm breadcrumbs mb-4">
+    <ul>
+      <li><a href="{% url 'notifications:blast_list' team.slug %}">{% translate "Notifications" %}</a></li>
+      <li>{{ blast }}</li>
+    </ul>
+  </div>
+
+  <div class="flex justify-between items-start mb-6">
+    <div>
+      <h1 class="text-2xl font-bold">{{ blast }}</h1>
+      <div class="flex items-center gap-2 mt-2">
+        {% include "notifications/components/channel_selector.html" with channel=blast.channel readonly=True %}
+        {% if blast.status == 'draft' %}
+          <span class="badge badge-warning">{% translate "Draft" %}</span>
+        {% elif blast.status == 'sending' %}
+          <span class="badge badge-info">{% translate "Sending" %}</span>
+        {% elif blast.status == 'sent' %}
+          <span class="badge badge-success">{% translate "Sent" %}</span>
+        {% elif blast.status == 'failed' %}
+          <span class="badge badge-error">{% translate "Failed" %}</span>
+        {% endif %}
+      </div>
+    </div>
+    {% if blast.status == 'draft' and request.team_membership.role == 'admin' %}
+    <form method="post" action="{% url 'notifications:blast_send' team.slug blast.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary" onclick="return confirm('{% translate "Send this blast to all recipients?" %}')">
+        <i class="fa fa-paper-plane mr-1"></i> {% translate "Send Now" %}
+      </button>
+    </form>
+    {% endif %}
+  </div>
+
+  {# Blast body preview #}
+  <div class="card bg-base-200 mb-6">
+    <div class="card-body">
+      {% if blast.subject %}
+      <h3 class="font-semibold mb-2">{{ blast.subject }}</h3>
+      {% endif %}
+      <p class="whitespace-pre-wrap">{{ blast.body }}</p>
+      {% if blast.sent_at %}
+      <div class="text-sm text-base-content/60 mt-4">
+        {% translate "Sent at" %}: {{ blast.sent_at|date:"N j, Y g:i A" }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Delivery stats #}
+  <div class="stats shadow mb-6">
+    <div class="stat">
+      <div class="stat-title">{% translate "Recipients" %}</div>
+      <div class="stat-value text-lg">{{ blast.recipient_count }}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-title">{% translate "Sent" %}</div>
+      <div class="stat-value text-lg text-success">{{ blast.sent_count }}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-title">{% translate "Failed" %}</div>
+      <div class="stat-value text-lg text-error">{{ blast.failed_count }}</div>
+    </div>
+  </div>
+
+  {# Recipient table #}
+  {% include "notifications/components/recipient_table.html" with recipients=recipients %}
+</div>
+{% endblock %}
