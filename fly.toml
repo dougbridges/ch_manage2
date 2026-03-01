@@ -1,0 +1,53 @@
+app = 'ch-manage2'
+primary_region = 'ord'
+kill_signal = 'SIGINT'
+kill_timeout = '5s'
+
+[experimental]
+  auto_rollback = true
+
+[build]
+  dockerfile = 'Dockerfile.web'
+
+[deploy]
+  release_command = 'python manage.py migrate --noinput'
+
+[env]
+  DJANGO_SETTINGS_MODULE = 'ch_manage2.settings_production'
+  PORT = '8080'
+
+[processes]
+  app = 'gunicorn --bind 0.0.0.0:8080 --workers 1 --threads 8 --timeout 0 ch_manage2.asgi:application -k uvicorn.workers.UvicornWorker'
+  worker = 'celery -A ch_manage2 worker -l INFO --pool threads --concurrency 20'
+  beat = 'celery -A ch_manage2 beat -l INFO'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[http_service.checks]]
+    interval = '10s'
+    timeout = '2s'
+    grace_period = '5s'
+    method = 'GET'
+    path = '/'
+
+    [http_service.checks.headers]
+      Host = 'localhost:8000'
+      X-Forwarded-Proto = 'https'
+
+[[vm]]
+  memory_mb = 2048
+  cpu_kind = 'shared'
+  cpus = 1
+  processes = ['app', 'worker']
+
+[[vm]]
+  memory_mb = 512
+  cpu_kind = 'shared'
+  cpus = 1
+  processes = ['beat']
