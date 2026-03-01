@@ -1,0 +1,13 @@
+{% load i18n %}
+{# Category badge component #}
+{% if category == 'worship' %}
+<span class="badge badge-primary badge-sm">{% translate "Worship" %}</span>
+{% elif category == 'fellowship' %}
+<span class="badge badge-secondary badge-sm">{% translate "Fellowship" %}</span>
+{% elif category == 'outreach' %}
+<span class="badge badge-accent badge-sm">{% translate "Outreach" %}</span>
+{% elif category == 'youth' %}
+<span class="badge badge-info badge-sm">{% translate "Youth" %}</span>
+{% else %}
+<span class="badge badge-ghost badge-sm">{% translate "Other" %}</span>
+{% endif %}

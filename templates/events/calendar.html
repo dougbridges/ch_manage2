@@ -1,0 +1,15 @@
+{% extends "web/app/app_base.html" %}
+{% load i18n %}
+{% block app %}
+<div class="px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">{% translate "Calendar" %}</h1>
+    <a href="{% url 'events:event_list' team.slug %}" class="btn btn-outline btn-sm">
+      <i class="fa fa-list mr-1"></i> {% translate "List View" %}
+    </a>
+  </div>
+  <div id="calendar-grid">
+    {% include "events/components/calendar_grid.html" %}
+  </div>
+</div>
+{% endblock %}

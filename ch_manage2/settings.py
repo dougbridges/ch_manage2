@@ -72,6 +72,7 @@ THIRD_PARTY_APPS = [
     "health_check.contrib.celery",
     "health_check.contrib.redis",
     "django_celery_beat",
+    "recurrence",
 ]
 
 # Put your project-specific apps here
@@ -83,6 +84,7 @@ PROJECT_APPS = [
     "apps.teams.apps.TeamConfig",
     "apps.chat",
     "apps.ai.apps.AiConfig",
+    "apps.events.apps.EventsConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS

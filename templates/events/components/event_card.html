@@ -1,0 +1,25 @@
+{% load i18n %}
+{# Reusable event card for list views #}
+<div class="card bg-base-200 hover:shadow-md transition-shadow">
+  <div class="card-body p-4">
+    <div class="flex justify-between items-start">
+      <div>
+        <a href="{% url 'events:event_detail' team.slug event.pk %}" class="text-lg font-semibold link link-hover">
+          {{ event.title }}
+        </a>
+        <div class="flex items-center gap-3 mt-1 text-sm text-base-content/60">
+          <span><i class="fa fa-clock mr-1"></i> {{ event.start_datetime|date:"N j, Y g:i A" }}</span>
+          {% if event.location %}
+          <span><i class="fa fa-map-marker-alt mr-1"></i> {{ event.location }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        {% include "events/components/event_category_badge.html" with category=event.category %}
+      </div>
+    </div>
+    {% if event.description %}
+    <p class="text-sm text-base-content/70 mt-2 line-clamp-2">{{ event.description }}</p>
+    {% endif %}
+  </div>
+</div>

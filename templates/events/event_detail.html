@@ -1,0 +1,73 @@
+{% extends "web/app/app_base.html" %}
+{% load i18n %}
+{% block app %}
+<div class="px-4 py-6">
+  {# Breadcrumb #}
+  <div class="text-sm breadcrumbs mb-4">
+    <ul>
+      <li><a href="{% url 'events:event_list' team.slug %}">{% translate "Events" %}</a></li>
+      <li>{{ event.title }}</li>
+    </ul>
+  </div>
+
+  {# Event header #}
+  <div class="flex justify-between items-start mb-6">
+    <div>
+      <h1 class="text-2xl font-bold">{{ event.title }}</h1>
+      {% include "events/components/event_category_badge.html" with category=event.category %}
+    </div>
+    {% if request.team_membership.role != 'member' %}
+    <div class="flex gap-2">
+      <a href="{% url 'events:event_edit' team.slug event.pk %}" class="btn btn-outline btn-sm">
+        <i class="fa fa-edit mr-1"></i> {% translate "Edit" %}
+      </a>
+      {% if request.team_membership.role == 'admin' %}
+      <a href="{% url 'events:event_delete' team.slug event.pk %}" class="btn btn-error btn-outline btn-sm">
+        <i class="fa fa-trash mr-1"></i> {% translate "Delete" %}
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  {# Event details card #}
+  <div class="card bg-base-200 mb-6">
+    <div class="card-body">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <div class="text-sm text-base-content/60">{% translate "Date & Time" %}</div>
+          <div>
+            <i class="fa fa-clock mr-1"></i>
+            {{ event.start_datetime|date:"N j, Y g:i A" }} — {{ event.end_datetime|date:"g:i A" }}
+          </div>
+        </div>
+        {% if event.location %}
+        <div>
+          <div class="text-sm text-base-content/60">{% translate "Location" %}</div>
+          <div><i class="fa fa-map-marker-alt mr-1"></i> {{ event.location }}</div>
+        </div>
+        {% endif %}
+      </div>
+      {% if event.description %}
+      <div class="mt-4">
+        <div class="text-sm text-base-content/60 mb-1">{% translate "Description" %}</div>
+        <p class="whitespace-pre-wrap">{{ event.description }}</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Volunteer slots #}
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold">{% translate "Volunteer Slots" %}</h2>
+    {% if request.team_membership.role != 'member' %}
+    <a href="{% url 'events:slot_create' team.slug event.pk %}" class="btn btn-primary btn-sm">
+      <i class="fa fa-plus mr-1"></i> {% translate "Add Slot" %}
+    </a>
+    {% endif %}
+  </div>
+  <div id="slot-list">
+    {% include "events/components/slot_list.html" with event=event slots=slots %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% load i18n %}
+{# Sign up / cancel button — HTMX swappable #}
+{% if request.user.is_authenticated %}
+  {% with user_signup=None %}
+    {# Check if user is already signed up for this slot #}
+    {% for signup in slot.active_signups %}
+      {% if signup.volunteer_id == request.user.pk %}
+        <div class="mt-3">
+          <form method="post"
+                action="{% url 'events:slot_cancel_signup' team.slug event.pk slot.pk %}"
+                hx-post="{% url 'events:slot_cancel_signup' team.slug event.pk slot.pk %}"
+                hx-target="#slot-list"
+                hx-swap="innerHTML">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline btn-warning btn-sm">
+              <i class="fa fa-times mr-1"></i> {% translate "Cancel Signup" %}
+            </button>
+          </form>
+        </div>
+      {% endif %}
+    {% empty %}
+      {# Not signed up — show signup button if slot has room #}
+      {% if not slot.is_full %}
+      <div class="mt-3">
+        <form method="post"
+              action="{% url 'events:slot_signup' team.slug event.pk slot.pk %}"
+              hx-post="{% url 'events:slot_signup' team.slug event.pk slot.pk %}"
+              hx-target="#slot-list"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa fa-hand-point-up mr-1"></i> {% translate "Sign Up" %}
+          </button>
+        </form>
+      </div>
+      {% endif %}
+    {% endfor %}
+  {% endwith %}
+{% endif %}

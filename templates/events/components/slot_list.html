@@ -1,0 +1,63 @@
+{% load i18n %}
+{# Volunteer slots for an event — HTMX swappable after signup/cancel #}
+{% if slots %}
+<div class="grid gap-3">
+  {% for slot in slots %}
+  <div class="card bg-base-200">
+    <div class="card-body p-4">
+      <div class="flex justify-between items-start">
+        <div>
+          <h3 class="font-semibold">{{ slot.role_name }}</h3>
+          {% if slot.description %}
+          <p class="text-sm text-base-content/60 mt-1">{{ slot.description }}</p>
+          {% endif %}
+          <div class="text-sm mt-2">
+            <span class="{% if slot.is_full %}text-error{% else %}text-success{% endif %}">
+              {{ slot.active_signups.count }}/{{ slot.slots_needed }}
+              {% translate "filled" %}
+            </span>
+          </div>
+        </div>
+        <div class="flex gap-1">
+          {% if request.team_membership.role != 'member' %}
+          <a href="{% url 'events:slot_edit' team.slug event.pk slot.pk %}" class="btn btn-ghost btn-xs">
+            <i class="fa fa-edit"></i>
+          </a>
+          <form method="post" action="{% url 'events:slot_delete' team.slug event.pk slot.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-ghost btn-xs text-error" onclick="return confirm('{% translate "Delete this slot?" %}')">
+              <i class="fa fa-trash"></i>
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+
+      {# Current signups #}
+      {% if slot.active_signups.count > 0 %}
+      <div class="mt-3">
+        <div class="flex flex-wrap gap-2">
+          {% for signup in slot.active_signups %}
+          <span class="badge badge-outline badge-sm">
+            {{ signup.volunteer.get_display_name }}
+            {% if signup.status == 'tentative' %}
+            <i class="fa fa-question-circle ml-1 text-warning"></i>
+            {% endif %}
+          </span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {# Signup/cancel button #}
+      {% include "events/components/signup_button.html" with slot=slot event=event %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-8 text-base-content/60">
+  <i class="fa fa-hand-holding-heart text-3xl mb-2"></i>
+  <p>{% translate "No volunteer slots yet." %}</p>
+</div>
+{% endif %}

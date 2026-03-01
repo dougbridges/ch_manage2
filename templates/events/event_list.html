@@ -1,0 +1,32 @@
+{% extends "web/app/app_base.html" %}
+{% load i18n %}
+{% block app %}
+<div class="px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">{% translate "Events" %}</h1>
+    <div class="flex gap-2">
+      <a href="{% url 'events:event_calendar' team.slug %}" class="btn btn-outline btn-sm">
+        <i class="fa fa-calendar-days mr-1"></i> {% translate "Calendar" %}
+      </a>
+      {% if request.team_membership.role != 'member' %}
+      <a href="{% url 'events:event_create' team.slug %}" class="btn btn-primary btn-sm">
+        <i class="fa fa-plus mr-1"></i> {% translate "New Event" %}
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if events %}
+  <div class="grid gap-4">
+    {% for event in events %}
+      {% include "events/components/event_card.html" with event=event %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-12">
+    <i class="fa fa-calendar-xmark text-4xl text-base-content/30 mb-4"></i>
+    <p class="text-base-content/60">{% translate "No upcoming events." %}</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

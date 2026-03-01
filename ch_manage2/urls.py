@@ -23,6 +23,7 @@ from django.views.generic import RedirectView
 from django.views.i18n import JavaScriptCatalog
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
+from apps.events.urls import team_urlpatterns as event_team_urls
 from apps.teams.urls import team_urlpatterns as single_team_urls
 from apps.web.sitemaps import StaticViewSitemap
 from apps.web.urls import team_urlpatterns as web_team_urls
@@ -35,6 +36,7 @@ sitemaps = {
 team_urlpatterns = [
     path("", include(web_team_urls)),
     path("team/", include(single_team_urls)),
+    path("events/", include(event_team_urls)),
 ]
 
 urlpatterns = [
