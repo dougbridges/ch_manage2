@@ -1,0 +1,14 @@
+Event Reminder
+
+Hi {{ user.get_display_name }},
+
+Just a reminder about an upcoming event:
+
+{{ event.title }}
+Date: {{ event.start_datetime|date:"l, N j, Y" }} at {{ event.start_datetime|date:"g:i A" }}
+{% if event.location %}Location: {{ event.location }}{% endif %}
+
+Log in to view details or manage your volunteer signup.
+
+--
+You received this from {{ event.team }}.

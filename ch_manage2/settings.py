@@ -446,6 +446,10 @@ SCHEDULED_TASKS: dict[str, Any] = {
         "task": "apps.volunteers.tasks.auto_generate_rotations",
         "schedule": 604800,  # weekly
     },
+    "send-event-reminders": {
+        "task": "apps.events.tasks.send_event_reminders",
+        "schedule": 32400,  # daily (9 hours)
+    },
 }
 
 # Notification backends

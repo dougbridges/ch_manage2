@@ -1,0 +1,16 @@
+Event Updated: {{ event.title }}
+
+Hi {{ user.get_display_name }},
+
+An event you signed up for has been updated:
+
+Changes:
+{% for change in changes %}- {{ change }}
+{% endfor %}
+
+{{ event.title }}
+Date: {{ event.start_datetime|date:"l, N j, Y" }} at {{ event.start_datetime|date:"g:i A" }}
+{% if event.location %}Location: {{ event.location }}{% endif %}
+
+--
+You received this from {{ event.team }}.
