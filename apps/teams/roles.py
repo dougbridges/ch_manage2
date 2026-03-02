@@ -43,6 +43,4 @@ def is_coordinator(user: CustomUser | AnonymousUser, team) -> bool:
 
     from .models import Membership
 
-    return Membership.objects.filter(
-        team=team, user=user, role__in=[ROLE_ADMIN, ROLE_COORDINATOR]
-    ).exists()
+    return Membership.objects.filter(team=team, user=user, role__in=[ROLE_ADMIN, ROLE_COORDINATOR]).exists()

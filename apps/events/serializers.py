@@ -18,15 +18,23 @@ class VolunteerSignupSerializer(serializers.ModelSerializer):
 
 class VolunteerSlotSerializer(serializers.ModelSerializer):
     signups = VolunteerSignupSerializer(many=True, read_only=True)
-    active_signups = serializers.IntegerField(read_only=True)
+    active_signups_count = serializers.SerializerMethodField()
     slots_remaining = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = VolunteerSlot
         fields = [
-            "id", "role_name", "description", "slots_needed",
-            "active_signups", "slots_remaining", "signups",
+            "id",
+            "role_name",
+            "description",
+            "slots_needed",
+            "active_signups_count",
+            "slots_remaining",
+            "signups",
         ]
+
+    def get_active_signups_count(self, obj):
+        return obj.active_signups.count()
 
 
 class VolunteerSlotWriteSerializer(serializers.ModelSerializer):
@@ -41,9 +49,18 @@ class EventListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = [
-            "id", "title", "description", "location", "start_datetime",
-            "end_datetime", "is_all_day", "category", "is_published",
-            "created_by", "created_by_name", "created_at",
+            "id",
+            "title",
+            "description",
+            "location",
+            "start_datetime",
+            "end_datetime",
+            "is_all_day",
+            "category",
+            "is_published",
+            "created_by",
+            "created_by_name",
+            "created_at",
         ]
         read_only_fields = ["id", "created_by", "created_by_name", "created_at"]
 
@@ -56,10 +73,20 @@ class EventDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = [
-            "id", "title", "description", "location", "start_datetime",
-            "end_datetime", "is_all_day", "category", "is_published",
-            "created_by", "created_by_name", "created_at",
-            "volunteer_slots", "slots_summary",
+            "id",
+            "title",
+            "description",
+            "location",
+            "start_datetime",
+            "end_datetime",
+            "is_all_day",
+            "category",
+            "is_published",
+            "created_by",
+            "created_by_name",
+            "created_at",
+            "volunteer_slots",
+            "slots_summary",
         ]
         read_only_fields = ["id", "created_by", "created_by_name", "created_at"]
 
@@ -68,8 +95,14 @@ class EventWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = [
-            "title", "description", "location", "start_datetime",
-            "end_datetime", "is_all_day", "category", "is_published",
+            "title",
+            "description",
+            "location",
+            "start_datetime",
+            "end_datetime",
+            "is_all_day",
+            "category",
+            "is_published",
         ]
 
     def validate(self, data):

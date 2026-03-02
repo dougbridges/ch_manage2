@@ -49,7 +49,8 @@ class CalendarMonthViewTest(EventTestBase):
         # Create an event on a known date
         dt = timezone.datetime(2026, 6, 15, 10, 0, tzinfo=timezone.get_current_timezone())
         create_event(
-            self.team, self.admin_user,
+            self.team,
+            self.admin_user,
             title="Flag Day Service",
             start_datetime=dt,
             end_datetime=dt + timezone.timedelta(hours=2),

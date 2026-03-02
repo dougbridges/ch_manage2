@@ -23,7 +23,6 @@ def send_shift_reminders(days_ahead: int = 2):
     haven't already received a reminder.
     """
     from apps.notifications.backends.loader import get_email_backend
-    from apps.notifications.models import ContactPreference
 
     from .models import ScheduledShift, ShiftStatus
 
@@ -41,14 +40,20 @@ def send_shift_reminders(days_ahead: int = 2):
     for shift in shifts:
         user = shift.volunteer.user
         try:
-            body_html = render_to_string("volunteers/email/shift_reminder.html", {
-                "shift": shift,
-                "user": user,
-            })
-            body_text = render_to_string("volunteers/email/shift_reminder.txt", {
-                "shift": shift,
-                "user": user,
-            })
+            body_html = render_to_string(
+                "volunteers/email/shift_reminder.html",
+                {
+                    "shift": shift,
+                    "user": user,
+                },
+            )
+            body_text = render_to_string(
+                "volunteers/email/shift_reminder.txt",
+                {
+                    "shift": shift,
+                    "user": user,
+                },
+            )
             backend.send_email(
                 recipient_email=user.email,
                 subject=f"Shift Reminder: {shift.schedule.name} on {shift.date}",
@@ -73,7 +78,6 @@ def auto_generate_rotations(weeks_ahead: int = 4):
     Generates shifts for the next N weeks if they don't already exist.
     Only processes schedules with round_robin or weighted strategy.
     """
-    from datetime import date
 
     from .models import RotationSchedule
     from .rotation import generate_rotation

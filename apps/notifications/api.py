@@ -18,9 +18,7 @@ from .serializers import MessageBlastDetailSerializer, MessageBlastListSerialize
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         team_slug = view.kwargs.get("team_slug")
-        return Membership.objects.filter(
-            team__slug=team_slug, user=request.user, role=ROLE_ADMIN
-        ).exists()
+        return Membership.objects.filter(team__slug=team_slug, user=request.user, role=ROLE_ADMIN).exists()
 
 
 class BlastViewSet(viewsets.ModelViewSet):
@@ -46,11 +44,13 @@ class BlastViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         from apps.teams.models import Team
+
         team = Team.objects.get(slug=self.kwargs["team_slug"])
         blast = serializer.save(team=team, created_by=self.request.user, recipient_filter={"all": True})
 
         # Auto-create recipient records for all team members
         from apps.notifications.models import ContactPreference
+
         memberships = Membership.objects.filter(team=team).select_related("user")
         recipients = []
         for membership in memberships:
@@ -62,10 +62,15 @@ class BlastViewSet(viewsets.ModelViewSet):
             elif blast.channel == NotificationChannel.SMS:
                 if not pref or not pref.receive_sms or not pref.phone_number:
                     continue
-            recipients.append(MessageRecipient(
-                blast=blast, user=user, team=team,
-                channel=blast.channel, status=RecipientStatus.PENDING,
-            ))
+            recipients.append(
+                MessageRecipient(
+                    blast=blast,
+                    user=user,
+                    team=team,
+                    channel=blast.channel,
+                    status=RecipientStatus.PENDING,
+                )
+            )
         MessageRecipient.objects.bulk_create(recipients)
 
     @action(detail=True, methods=["post"])
@@ -76,6 +81,7 @@ class BlastViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Blast already sent or in progress."}, status=400)
 
         from .tasks import send_blast
+
         blast.status = BlastStatus.SENDING
         blast.save()
         send_blast.delay(blast.pk)

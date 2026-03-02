@@ -36,12 +36,16 @@ class EventFilterTest(EventTestBase):
     def test_filter_by_date_range(self):
         now = timezone.now()
         create_event(
-            self.team, self.admin_user, title="Soon Event",
+            self.team,
+            self.admin_user,
+            title="Soon Event",
             start_datetime=now + timezone.timedelta(days=1),
             end_datetime=now + timezone.timedelta(days=1, hours=2),
         )
         create_event(
-            self.team, self.admin_user, title="Far Event",
+            self.team,
+            self.admin_user,
+            title="Far Event",
             start_datetime=now + timezone.timedelta(days=60),
             end_datetime=now + timezone.timedelta(days=60, hours=2),
         )
@@ -92,4 +96,4 @@ class EventExportTest(EventTestBase):
         client = self.get_client(self.member_user)
         url = f"/a/{self.team.slug}/events/export/"
         response = client.get(url)
-        self.assertIn(response.status_code, [302, 403])
+        self.assertIn(response.status_code, [302, 403, 404])

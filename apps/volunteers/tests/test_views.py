@@ -3,7 +3,6 @@ Tests for volunteer views: profiles, availability, rotations, shifts.
 """
 
 from datetime import date
-from unittest.mock import patch
 
 from django.urls import reverse
 
@@ -19,7 +18,6 @@ from .base import (
 
 
 class VolunteerListViewTest(VolunteerTestBase):
-
     def test_coordinator_can_view(self):
         client = self.get_client(self.coordinator_user)
         url = reverse("volunteers:volunteer_list", args=[self.team.slug])
@@ -34,7 +32,6 @@ class VolunteerListViewTest(VolunteerTestBase):
 
 
 class MyVolunteerProfileViewTest(VolunteerTestBase):
-
     def test_member_can_access(self):
         client = self.get_client(self.member_user)
         url = reverse("volunteers:my_volunteer_profile", args=[self.team.slug])
@@ -58,7 +55,6 @@ class MyVolunteerProfileViewTest(VolunteerTestBase):
 
 
 class VolunteerProfileDetailViewTest(VolunteerTestBase):
-
     def test_coordinator_can_view(self):
         profile = create_volunteer_profile(self.team, self.member_user)
         client = self.get_client(self.coordinator_user)
@@ -75,7 +71,6 @@ class VolunteerProfileDetailViewTest(VolunteerTestBase):
 
 
 class MyAvailabilityViewTest(VolunteerTestBase):
-
     def test_member_can_access(self):
         client = self.get_client(self.member_user)
         url = reverse("volunteers:my_availability", args=[self.team.slug])
@@ -97,7 +92,6 @@ class MyAvailabilityViewTest(VolunteerTestBase):
 
 
 class RotationListViewTest(VolunteerTestBase):
-
     def test_coordinator_can_view(self):
         client = self.get_client(self.coordinator_user)
         url = reverse("volunteers:rotation_list", args=[self.team.slug])
@@ -106,7 +100,6 @@ class RotationListViewTest(VolunteerTestBase):
 
 
 class RotationCreateViewTest(VolunteerTestBase):
-
     def test_coordinator_can_create(self):
         event = create_event(self.team, self.admin_user)
         client = self.get_client(self.coordinator_user)
@@ -124,7 +117,6 @@ class RotationCreateViewTest(VolunteerTestBase):
 
 
 class RotationDetailViewTest(VolunteerTestBase):
-
     def test_shows_rotation(self):
         rotation = create_rotation(self.team)
         client = self.get_client(self.coordinator_user)
@@ -135,7 +127,6 @@ class RotationDetailViewTest(VolunteerTestBase):
 
 
 class RotationGenerateViewTest(VolunteerTestBase):
-
     def test_generate_creates_shifts(self):
         event = create_event(self.team, self.admin_user)
         rotation = create_rotation(self.team, event)
@@ -151,7 +142,6 @@ class RotationGenerateViewTest(VolunteerTestBase):
 
 
 class MyShiftsViewTest(VolunteerTestBase):
-
     def test_member_can_view(self):
         client = self.get_client(self.member_user)
         url = reverse("volunteers:my_shifts", args=[self.team.slug])
@@ -171,7 +161,6 @@ class MyShiftsViewTest(VolunteerTestBase):
 
 
 class ShiftConfirmDeclineViewTest(VolunteerTestBase):
-
     def test_confirm_shift(self):
         event = create_event(self.team, self.admin_user)
         rotation = create_rotation(self.team, event)

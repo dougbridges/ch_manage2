@@ -18,7 +18,9 @@ class ConsoleBackend(NotificationBackend):
         """Log email to console."""
         logger.info(
             "[ConsoleBackend] EMAIL to=%s subject='%s'\n%s",
-            recipient_email, subject, body_text[:200],
+            recipient_email,
+            subject,
+            body_text[:200],
         )
         return f"console-email-{recipient_email}"
 
@@ -26,6 +28,7 @@ class ConsoleBackend(NotificationBackend):
         """Log SMS to console."""
         logger.info(
             "[ConsoleBackend] SMS to=%s body='%s'",
-            phone_number, body[:160],
+            phone_number,
+            body[:160],
         )
         return f"console-sms-{phone_number}"

@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from django.urls import reverse
 
-from ..models import BlastStatus, MessageBlast, MessageRecipient, NotificationChannel
+from ..models import BlastStatus, MessageBlast, NotificationChannel
 from .base import NotificationTestBase, create_blast, create_preference, create_recipient
 
 
@@ -146,7 +146,7 @@ class BlastDetailViewTest(NotificationTestBase):
 class BlastSendViewTest(NotificationTestBase):
     """Tests for the blast_send view."""
 
-    @patch("apps.notifications.views.send_blast.delay")
+    @patch("apps.notifications.tasks.send_blast.delay")
     def test_admin_can_trigger_send(self, mock_delay):
         blast = create_blast(self.team, self.admin_user)
         create_recipient(blast, self.member_user)
@@ -186,12 +186,11 @@ class ContactPreferencesViewTest(NotificationTestBase):
 
     def test_creates_preference_on_first_visit(self):
         from ..models import ContactPreference
+
         client = self.get_client(self.member_user)
         url = reverse("notifications:contact_preferences", args=[self.team.slug])
         client.get(url)
-        self.assertTrue(
-            ContactPreference.objects.filter(team=self.team, user=self.member_user).exists()
-        )
+        self.assertTrue(ContactPreference.objects.filter(team=self.team, user=self.member_user).exists())
 
     def test_save_preferences(self):
         client = self.get_client(self.member_user)
@@ -204,6 +203,7 @@ class ContactPreferencesViewTest(NotificationTestBase):
         response = client.post(url, data)
         self.assertEqual(response.status_code, 302)
         from ..models import ContactPreference
+
         pref = ContactPreference.objects.get(team=self.team, user=self.member_user)
         self.assertTrue(pref.receive_sms)
         self.assertEqual(pref.phone_number, "+15551234567")

@@ -49,16 +49,20 @@ def event_list(request, team_slug):
     paginator = Paginator(events, 20)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    return render(request, "events/event_list.html", {
-        "events": page_obj,
-        "page_obj": page_obj,
-        "categories": EventCategory.choices,
-        "filter_category": category,
-        "filter_date_from": date_from,
-        "filter_date_to": date_to,
-        "filter_q": q,
-        "active_tab": "events",
-    })
+    return render(
+        request,
+        "events/event_list.html",
+        {
+            "events": page_obj,
+            "page_obj": page_obj,
+            "categories": EventCategory.choices,
+            "filter_category": category,
+            "filter_date_from": date_from,
+            "filter_date_to": date_to,
+            "filter_q": q,
+            "active_tab": "events",
+        },
+    )
 
 
 @login_and_team_required
@@ -68,14 +72,19 @@ def event_detail(request, team_slug, pk):
     if not event.is_published:
         # Only coordinators+ can see unpublished events
         from apps.teams.roles import is_coordinator
+
         if not is_coordinator(request.user, request.team):
             raise Http404
     slots = event.volunteer_slots.prefetch_related("signups__volunteer").all()
-    return render(request, "events/event_detail.html", {
-        "event": event,
-        "slots": slots,
-        "active_tab": "events",
-    })
+    return render(
+        request,
+        "events/event_detail.html",
+        {
+            "event": event,
+            "slots": slots,
+            "active_tab": "events",
+        },
+    )
 
 
 @team_coordinator_required
@@ -92,10 +101,14 @@ def event_create(request, team_slug):
             return redirect("events:event_detail", team_slug=team_slug, pk=event.pk)
     else:
         form = EventForm()
-    return render(request, "events/event_form.html", {
-        "form": form,
-        "active_tab": "events",
-    })
+    return render(
+        request,
+        "events/event_form.html",
+        {
+            "form": form,
+            "active_tab": "events",
+        },
+    )
 
 
 @team_coordinator_required
@@ -110,11 +123,15 @@ def event_edit(request, team_slug, pk):
             return redirect("events:event_detail", team_slug=team_slug, pk=event.pk)
     else:
         form = EventForm(instance=event)
-    return render(request, "events/event_form.html", {
-        "form": form,
-        "event": event,
-        "active_tab": "events",
-    })
+    return render(
+        request,
+        "events/event_form.html",
+        {
+            "form": form,
+            "event": event,
+            "active_tab": "events",
+        },
+    )
 
 
 @team_admin_required
@@ -125,7 +142,11 @@ def event_delete(request, team_slug, pk):
         event.delete()
         messages.success(request, _("Event deleted."))
         return redirect("events:event_list", team_slug=team_slug)
-    return render(request, "events/event_confirm_delete.html", {
-        "event": event,
-        "active_tab": "events",
-    })
+    return render(
+        request,
+        "events/event_confirm_delete.html",
+        {
+            "event": event,
+            "active_tab": "events",
+        },
+    )

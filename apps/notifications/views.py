@@ -8,7 +8,6 @@ All team members can manage their own contact preferences.
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.teams.decorators import login_and_team_required, team_admin_required, team_coordinator_required
@@ -42,16 +41,20 @@ def blast_list(request, team_slug):
     paginator = Paginator(blasts, 20)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    return render(request, "notifications/blast_list.html", {
-        "blasts": page_obj,
-        "page_obj": page_obj,
-        "statuses": BlastStatus.choices,
-        "channels": NotificationChannel.choices,
-        "filter_status": status,
-        "filter_channel": channel,
-        "filter_q": q,
-        "active_tab": "notifications",
-    })
+    return render(
+        request,
+        "notifications/blast_list.html",
+        {
+            "blasts": page_obj,
+            "page_obj": page_obj,
+            "statuses": BlastStatus.choices,
+            "channels": NotificationChannel.choices,
+            "filter_status": status,
+            "filter_channel": channel,
+            "filter_q": q,
+            "active_tab": "notifications",
+        },
+    )
 
 
 @team_admin_required
@@ -79,23 +82,29 @@ def blast_compose(request, team_slug):
                 elif blast.channel == NotificationChannel.SMS:
                     if not pref or not pref.receive_sms or not pref.phone_number:
                         continue
-                recipients.append(MessageRecipient(
-                    blast=blast,
-                    user=user,
-                    team=request.team,
-                    channel=blast.channel,
-                    status=RecipientStatus.PENDING,
-                ))
+                recipients.append(
+                    MessageRecipient(
+                        blast=blast,
+                        user=user,
+                        team=request.team,
+                        channel=blast.channel,
+                        status=RecipientStatus.PENDING,
+                    )
+                )
             MessageRecipient.objects.bulk_create(recipients)
 
             messages.success(request, _("Blast created with %(count)d recipients.") % {"count": len(recipients)})
             return redirect("notifications:blast_detail", team_slug=team_slug, pk=blast.pk)
     else:
         form = BlastComposeForm()
-    return render(request, "notifications/blast_compose.html", {
-        "form": form,
-        "active_tab": "notifications",
-    })
+    return render(
+        request,
+        "notifications/blast_compose.html",
+        {
+            "form": form,
+            "active_tab": "notifications",
+        },
+    )
 
 
 @team_coordinator_required
@@ -103,11 +112,15 @@ def blast_detail(request, team_slug, pk):
     """View blast details and delivery status."""
     blast = get_object_or_404(MessageBlast, pk=pk, team=request.team)
     recipients = blast.recipients.select_related("user").order_by("status")
-    return render(request, "notifications/blast_detail.html", {
-        "blast": blast,
-        "recipients": recipients,
-        "active_tab": "notifications",
-    })
+    return render(
+        request,
+        "notifications/blast_detail.html",
+        {
+            "blast": blast,
+            "recipients": recipients,
+            "active_tab": "notifications",
+        },
+    )
 
 
 @team_admin_required
@@ -120,6 +133,7 @@ def blast_send(request, team_slug, pk):
         else:
             # Import here to avoid circular imports
             from .tasks import send_blast
+
             blast.status = BlastStatus.SENDING
             blast.save()
             send_blast.delay(blast.pk)
@@ -144,7 +158,11 @@ def contact_preferences(request, team_slug):
             return redirect("notifications:contact_preferences", team_slug=team_slug)
     else:
         form = ContactPreferenceForm(instance=pref)
-    return render(request, "notifications/contact_preferences.html", {
-        "form": form,
-        "active_tab": "notifications",
-    })
+    return render(
+        request,
+        "notifications/contact_preferences.html",
+        {
+            "form": form,
+            "active_tab": "notifications",
+        },
+    )

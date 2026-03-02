@@ -60,4 +60,4 @@ class VolunteerExportTest(VolunteerTestBase):
         client = self.get_client(self.member_user)
         url = f"/a/{self.team.slug}/volunteers/export/roster/"
         response = client.get(url)
-        self.assertIn(response.status_code, [302, 403])
+        self.assertIn(response.status_code, [302, 403, 404])

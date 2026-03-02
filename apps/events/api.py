@@ -50,9 +50,7 @@ class IsAdmin(permissions.BasePermission):
         team_slug = view.kwargs.get("team_slug")
         if not team_slug:
             return False
-        return Membership.objects.filter(
-            team__slug=team_slug, user=request.user, role=ROLE_ADMIN
-        ).exists()
+        return Membership.objects.filter(team__slug=team_slug, user=request.user, role=ROLE_ADMIN).exists()
 
 
 class EventViewSet(viewsets.ModelViewSet):
@@ -82,6 +80,7 @@ class EventViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         from apps.teams.models import Team
+
         team = Team.objects.get(slug=self.kwargs["team_slug"])
         serializer.save(team=team, created_by=self.request.user)
 
@@ -117,37 +116,34 @@ class SlotViewSet(viewsets.ModelViewSet):
         )
         serializer.save(event=event, team=event.team)
 
-    @action(detail=True, methods=["post"], url_path="signup")
+    @action(detail=True, methods=["post", "delete"], url_path="signup")
     def signup(self, request, team_slug=None, event_pk=None, pk=None):
-        """Sign up the current user for this volunteer slot."""
+        """Sign up (POST) or cancel (DELETE) the current user's slot signup."""
         slot = self.get_object()
+
+        if request.method == "DELETE":
+            try:
+                existing = VolunteerSignup.objects.get(slot=slot, volunteer=request.user)
+                existing.status = SignupStatus.CANCELLED
+                existing.save()
+                return Response({"detail": "Signup cancelled."})
+            except VolunteerSignup.DoesNotExist:
+                return Response({"detail": "Not signed up."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # POST — sign up
         if slot.is_full:
             return Response({"detail": "Slot is full."}, status=status.HTTP_400_BAD_REQUEST)
 
-        signup, created = VolunteerSignup.objects.get_or_create(
+        signup_obj, created = VolunteerSignup.objects.get_or_create(
             slot=slot,
             volunteer=request.user,
             team=slot.team,
             defaults={"status": SignupStatus.CONFIRMED},
         )
-        if not created and signup.status == SignupStatus.CANCELLED:
-            signup.status = SignupStatus.CONFIRMED
-            signup.save()
+        if not created and signup_obj.status == SignupStatus.CANCELLED:
+            signup_obj.status = SignupStatus.CONFIRMED
+            signup_obj.save()
         elif not created:
             return Response({"detail": "Already signed up."}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"detail": "Signed up."}, status=status.HTTP_201_CREATED)
-
-    @action(detail=True, methods=["delete"], url_path="signup")
-    def cancel_signup(self, request, team_slug=None, event_pk=None, pk=None):
-        """Cancel the current user's signup for this slot."""
-        slot = self.get_object()
-        try:
-            signup = VolunteerSignup.objects.get(
-                slot=slot, volunteer=request.user
-            )
-            signup.status = SignupStatus.CANCELLED
-            signup.save()
-            return Response({"detail": "Signup cancelled."})
-        except VolunteerSignup.DoesNotExist:
-            return Response({"detail": "Not signed up."}, status=status.HTTP_400_BAD_REQUEST)

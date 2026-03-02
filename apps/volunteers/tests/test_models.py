@@ -7,7 +7,7 @@ from datetime import date
 
 from django.db import IntegrityError
 
-from ..models import RotationStrategy, ShiftStatus
+from ..models import ShiftStatus
 from .base import (
     VolunteerTestBase,
     add_rotation_member,
@@ -20,7 +20,6 @@ from .base import (
 
 
 class VolunteerProfileModelTest(VolunteerTestBase):
-
     def test_create_profile(self):
         profile = create_volunteer_profile(self.team, self.member_user)
         self.assertEqual(profile.team, self.team)
@@ -41,14 +40,11 @@ class VolunteerProfileModelTest(VolunteerTestBase):
         self.assertEqual(profile.skills, [])
 
     def test_skills_json(self):
-        profile = create_volunteer_profile(
-            self.team, self.member_user, skills=["nursery", "ushers"]
-        )
+        profile = create_volunteer_profile(self.team, self.member_user, skills=["nursery", "ushers"])
         self.assertEqual(profile.skills, ["nursery", "ushers"])
 
 
 class AvailabilityModelTest(VolunteerTestBase):
-
     def test_create_blackout(self):
         profile = create_volunteer_profile(self.team, self.member_user)
         av = create_blackout(profile, date(2026, 3, 15))
@@ -66,12 +62,12 @@ class AvailabilityModelTest(VolunteerTestBase):
         create_blackout(profile, date(2026, 3, 20))
         create_blackout(profile, date(2026, 3, 10))
         from ..models import Availability
+
         avails = list(Availability.objects.filter(volunteer=profile))
         self.assertEqual(avails[0].date, date(2026, 3, 10))
 
 
 class RotationScheduleModelTest(VolunteerTestBase):
-
     def test_create_rotation(self):
         event = create_event(self.team, self.admin_user)
         rotation = create_rotation(self.team, event)
@@ -86,12 +82,12 @@ class RotationScheduleModelTest(VolunteerTestBase):
         create_rotation(self.team, name="Alpha")
         create_rotation(self.team, name="Beta")
         from ..models import RotationSchedule
+
         rotations = list(RotationSchedule.objects.filter(team=self.team))
         self.assertEqual(rotations[0].name, "Alpha")
 
 
 class RotationMembershipModelTest(VolunteerTestBase):
-
     def test_add_member_to_rotation(self):
         profile = create_volunteer_profile(self.team, self.member_user)
         rotation = create_rotation(self.team)
@@ -108,7 +104,6 @@ class RotationMembershipModelTest(VolunteerTestBase):
 
 
 class ScheduledShiftModelTest(VolunteerTestBase):
-
     def test_create_shift(self):
         event = create_event(self.team, self.admin_user)
         rotation = create_rotation(self.team, event)
@@ -132,4 +127,5 @@ class ScheduledShiftModelTest(VolunteerTestBase):
         create_shift(rotation, profile, date(2026, 3, 15))
         rotation.delete()
         from ..models import ScheduledShift
+
         self.assertEqual(ScheduledShift.objects.filter(volunteer=profile).count(), 0)

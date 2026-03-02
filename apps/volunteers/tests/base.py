@@ -9,7 +9,7 @@ from datetime import date, timedelta
 from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 
-from apps.events.models import Event, EventCategory, VolunteerSlot
+from apps.events.models import Event, EventCategory
 from apps.teams.models import Membership, Team
 from apps.teams.roles import ROLE_ADMIN, ROLE_COORDINATOR, ROLE_MEMBER
 from apps.users.models import CustomUser
@@ -87,9 +87,7 @@ def add_rotation_member(
     )
 
 
-def create_shift(
-    schedule: RotationSchedule, profile: VolunteerProfile, shift_date: date, **kwargs
-) -> ScheduledShift:
+def create_shift(schedule: RotationSchedule, profile: VolunteerProfile, shift_date: date, **kwargs) -> ScheduledShift:
     defaults = {
         "event": schedule.event,
         "status": ShiftStatus.SCHEDULED,

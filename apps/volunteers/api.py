@@ -43,9 +43,7 @@ class VolunteerProfileViewSet(viewsets.ModelViewSet):
         team_slug = self.kwargs.get("team_slug")
         qs = VolunteerProfile.objects.filter(team__slug=team_slug).select_related("user")
         # Members can only see their own profile
-        membership = Membership.objects.filter(
-            team__slug=team_slug, user=self.request.user
-        ).first()
+        membership = Membership.objects.filter(team__slug=team_slug, user=self.request.user).first()
         if membership and membership.role not in [ROLE_ADMIN, ROLE_COORDINATOR]:
             qs = qs.filter(user=self.request.user)
         return qs
@@ -69,9 +67,7 @@ class ShiftViewSet(viewsets.ReadOnlyModelViewSet):
             team__slug=team_slug,
         ).select_related("schedule", "volunteer__user", "event")
 
-        membership = Membership.objects.filter(
-            team__slug=team_slug, user=self.request.user
-        ).first()
+        membership = Membership.objects.filter(team__slug=team_slug, user=self.request.user).first()
         if membership and membership.role not in [ROLE_ADMIN, ROLE_COORDINATOR]:
             qs = qs.filter(volunteer__user=self.request.user)
         return qs.order_by("date")

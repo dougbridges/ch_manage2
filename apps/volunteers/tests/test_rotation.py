@@ -12,15 +12,11 @@ from .base import (
     create_blackout,
     create_event,
     create_rotation,
-    create_user,
     create_volunteer_profile,
-    add_member,
 )
-from apps.teams.roles import ROLE_MEMBER
 
 
 class RoundRobinRotationTest(VolunteerTestBase):
-
     def test_round_robin_basic(self):
         event = create_event(self.team, self.admin_user)
         rotation = create_rotation(self.team, event, rotation_strategy=RotationStrategy.ROUND_ROBIN)
@@ -136,7 +132,6 @@ class RoundRobinRotationTest(VolunteerTestBase):
 
 
 class WeightedRotationTest(VolunteerTestBase):
-
     def test_weighted_basic(self):
         event = create_event(self.team, self.admin_user)
         rotation = create_rotation(self.team, event, rotation_strategy=RotationStrategy.WEIGHTED)
@@ -188,7 +183,6 @@ class WeightedRotationTest(VolunteerTestBase):
 
 
 class ManualRotationTest(VolunteerTestBase):
-
     def test_manual_returns_empty(self):
         rotation = create_rotation(self.team, rotation_strategy=RotationStrategy.MANUAL)
         shifts = generate_rotation(rotation, [date(2026, 3, 1)])

@@ -2,8 +2,7 @@
 Tests for volunteer Celery tasks: shift reminders and auto-generation.
 """
 
-from datetime import date, timedelta
-from unittest.mock import patch
+from datetime import timedelta
 
 from django.test import override_settings
 from django.utils import timezone
@@ -20,10 +19,7 @@ from .base import (
 
 
 class SendShiftRemindersTaskTest(VolunteerTestBase):
-
-    @override_settings(
-        NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-    )
+    @override_settings(NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
     def test_sends_reminders_for_upcoming_shifts(self):
         event = create_event(self.team, self.admin_user)
         rotation = create_rotation(self.team, event)
@@ -32,14 +28,13 @@ class SendShiftRemindersTaskTest(VolunteerTestBase):
         shift = create_shift(rotation, profile, tomorrow)
 
         from ..tasks import send_shift_reminders
+
         send_shift_reminders(days_ahead=2)
 
         shift.refresh_from_db()
         self.assertTrue(shift.reminder_sent)
 
-    @override_settings(
-        NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-    )
+    @override_settings(NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
     def test_does_not_resend_reminders(self):
         event = create_event(self.team, self.admin_user)
         rotation = create_rotation(self.team, event)
@@ -48,14 +43,13 @@ class SendShiftRemindersTaskTest(VolunteerTestBase):
         shift = create_shift(rotation, profile, tomorrow, reminder_sent=True)
 
         from ..tasks import send_shift_reminders
+
         send_shift_reminders(days_ahead=2)
 
         shift.refresh_from_db()
         self.assertTrue(shift.reminder_sent)
 
-    @override_settings(
-        NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-    )
+    @override_settings(NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
     def test_ignores_declined_shifts(self):
         event = create_event(self.team, self.admin_user)
         rotation = create_rotation(self.team, event)
@@ -64,6 +58,7 @@ class SendShiftRemindersTaskTest(VolunteerTestBase):
         shift = create_shift(rotation, profile, tomorrow, status=ShiftStatus.DECLINED)
 
         from ..tasks import send_shift_reminders
+
         send_shift_reminders(days_ahead=2)
 
         shift.refresh_from_db()
@@ -71,7 +66,6 @@ class SendShiftRemindersTaskTest(VolunteerTestBase):
 
 
 class AutoGenerateRotationsTaskTest(VolunteerTestBase):
-
     def test_generates_for_active_schedules(self):
         event = create_event(self.team, self.admin_user)
         rotation = create_rotation(self.team, event, rotation_strategy=RotationStrategy.ROUND_ROBIN)
@@ -79,9 +73,9 @@ class AutoGenerateRotationsTaskTest(VolunteerTestBase):
         add_rotation_member(rotation, profile)
 
         from ..tasks import auto_generate_rotations
+
         auto_generate_rotations(weeks_ahead=2)
 
-        from ..models import ScheduledShift
         # May or may not generate depending on event recurrence, but should not error
         # The task runs without raising
 
@@ -92,9 +86,11 @@ class AutoGenerateRotationsTaskTest(VolunteerTestBase):
         add_rotation_member(rotation, profile)
 
         from ..tasks import auto_generate_rotations
+
         auto_generate_rotations(weeks_ahead=2)
 
         from ..models import ScheduledShift
+
         self.assertEqual(ScheduledShift.objects.filter(schedule=rotation).count(), 0)
 
     def test_skips_manual_schedules(self):
@@ -104,7 +100,9 @@ class AutoGenerateRotationsTaskTest(VolunteerTestBase):
         add_rotation_member(rotation, profile)
 
         from ..tasks import auto_generate_rotations
+
         auto_generate_rotations(weeks_ahead=2)
 
         from ..models import ScheduledShift
+
         self.assertEqual(ScheduledShift.objects.filter(schedule=rotation).count(), 0)

@@ -15,7 +15,6 @@ from apps.notifications.models import BlastStatus, MessageBlast, NotificationCha
 from apps.teams.models import Membership, Team
 from apps.teams.roles import ROLE_ADMIN, ROLE_MEMBER
 from apps.users.models import CustomUser
-from apps.volunteers.models import ScheduledShift, RotationSchedule, VolunteerProfile
 
 TEST_STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -29,8 +28,12 @@ class DashboardTest(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.team = Team.objects.create(name="Dashboard Church", slug="dashboard-church")
-        cls.admin = CustomUser.objects.create_user(username="dash-admin@church.com", email="dash-admin@church.com", password="testpass123")
-        cls.member = CustomUser.objects.create_user(username="dash-member@church.com", email="dash-member@church.com", password="testpass123")
+        cls.admin = CustomUser.objects.create_user(
+            username="dash-admin@church.com", email="dash-admin@church.com", password="testpass123"
+        )
+        cls.member = CustomUser.objects.create_user(
+            username="dash-member@church.com", email="dash-member@church.com", password="testpass123"
+        )
         Membership.objects.create(team=cls.team, user=cls.admin, role=ROLE_ADMIN)
         Membership.objects.create(team=cls.team, user=cls.member, role=ROLE_MEMBER)
 

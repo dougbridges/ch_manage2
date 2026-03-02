@@ -130,9 +130,7 @@ def _generate_round_robin(
                 break
 
         if not assigned:
-            logger.warning(
-                "No available volunteer for %s on %s", schedule.name, shift_date
-            )
+            logger.warning("No available volunteer for %s on %s", schedule.name, shift_date)
 
     return shifts
 
@@ -202,8 +200,6 @@ def _generate_weighted(
             shifts.append(shift)
             assignment_counts[volunteer.pk] += 1
         else:
-            logger.warning(
-                "No available volunteer for %s on %s", schedule.name, shift_date
-            )
+            logger.warning("No available volunteer for %s on %s", schedule.name, shift_date)
 
     return shifts

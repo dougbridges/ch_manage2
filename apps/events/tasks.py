@@ -52,14 +52,20 @@ def send_event_reminders(hours_ahead: int = 48):
                 continue
 
             try:
-                body_html = render_to_string("events/email/event_reminder.html", {
-                    "event": event,
-                    "user": user,
-                })
-                body_text = render_to_string("events/email/event_reminder.txt", {
-                    "event": event,
-                    "user": user,
-                })
+                body_html = render_to_string(
+                    "events/email/event_reminder.html",
+                    {
+                        "event": event,
+                        "user": user,
+                    },
+                )
+                body_text = render_to_string(
+                    "events/email/event_reminder.txt",
+                    {
+                        "event": event,
+                        "user": user,
+                    },
+                )
                 backend.send_email(
                     recipient_email=user.email,
                     subject=f"Reminder: {event.title} — {event.start_datetime:%b %d at %I:%M %p}",

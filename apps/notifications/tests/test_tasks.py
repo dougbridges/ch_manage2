@@ -4,10 +4,10 @@ Tests for notification Celery tasks: send_blast, send_single_notification, send_
 
 from unittest.mock import patch
 
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from django.utils import timezone
 
-from ..models import BlastStatus, MessageBlast, NotificationChannel, RecipientStatus
+from ..models import BlastStatus, NotificationChannel, RecipientStatus
 from .base import (
     NotificationTestBase,
     create_blast,
@@ -26,6 +26,7 @@ class SendBlastTaskTest(NotificationTestBase):
         r2 = create_recipient(blast, self.coordinator_user)
 
         from ..tasks import send_blast
+
         send_blast(blast.pk)
 
         self.assertEqual(mock_delay.call_count, 2)
@@ -36,6 +37,7 @@ class SendBlastTaskTest(NotificationTestBase):
     @patch("apps.notifications.tasks.send_single_notification.delay")
     def test_nonexistent_blast(self, mock_delay):
         from ..tasks import send_blast
+
         send_blast(99999)  # should not raise
         mock_delay.assert_not_called()
 
@@ -43,25 +45,22 @@ class SendBlastTaskTest(NotificationTestBase):
 class SendSingleNotificationTaskTest(NotificationTestBase):
     """Tests for the send_single_notification task."""
 
-    @override_settings(
-        NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-    )
+    @override_settings(NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
     @patch("apps.notifications.tasks.send_single_notification.retry")
     def test_send_email_notification(self, mock_retry):
         blast = create_blast(self.team, self.admin_user, channel=NotificationChannel.EMAIL)
         recipient = create_recipient(blast, self.member_user)
 
         from ..tasks import send_single_notification
+
         send_single_notification(recipient.pk)
 
         recipient.refresh_from_db()
         self.assertEqual(recipient.status, RecipientStatus.SENT)
         self.assertIsNotNone(recipient.sent_at)
-        self.assertEqual(recipient.external_id, "console")
+        self.assertTrue(recipient.external_id.startswith("console-email-"))
 
-    @override_settings(
-        NOTIFICATION_SMS_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-    )
+    @override_settings(NOTIFICATION_SMS_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
     @patch("apps.notifications.tasks.send_single_notification.retry")
     def test_send_sms_notification(self, mock_retry):
         blast = create_blast(self.team, self.admin_user, channel=NotificationChannel.SMS)
@@ -69,6 +68,7 @@ class SendSingleNotificationTaskTest(NotificationTestBase):
         recipient = create_recipient(blast, self.member_user, channel=NotificationChannel.SMS)
 
         from ..tasks import send_single_notification
+
         send_single_notification(recipient.pk)
 
         recipient.refresh_from_db()
@@ -80,6 +80,7 @@ class SendSingleNotificationTaskTest(NotificationTestBase):
         recipient = create_recipient(blast, self.member_user, channel=NotificationChannel.SMS)
 
         from ..tasks import send_single_notification
+
         send_single_notification(recipient.pk)
 
         recipient.refresh_from_db()
@@ -89,6 +90,7 @@ class SendSingleNotificationTaskTest(NotificationTestBase):
     @patch("apps.notifications.tasks.send_single_notification.retry")
     def test_nonexistent_recipient(self, mock_retry):
         from ..tasks import send_single_notification
+
         send_single_notification(99999)  # should not raise
         mock_retry.assert_not_called()
 
@@ -106,6 +108,7 @@ class SendScheduledBlastsTaskTest(NotificationTestBase):
         )
 
         from ..tasks import send_scheduled_blasts
+
         send_scheduled_blasts()
 
         blast.refresh_from_db()
@@ -122,6 +125,7 @@ class SendScheduledBlastsTaskTest(NotificationTestBase):
         )
 
         from ..tasks import send_scheduled_blasts
+
         send_scheduled_blasts()
 
         blast.refresh_from_db()
@@ -138,6 +142,7 @@ class SendScheduledBlastsTaskTest(NotificationTestBase):
         )
 
         from ..tasks import send_scheduled_blasts
+
         send_scheduled_blasts()
 
         mock_delay.assert_not_called()

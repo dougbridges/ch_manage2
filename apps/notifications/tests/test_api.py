@@ -12,7 +12,6 @@ from .base import NotificationTestBase, create_blast, create_recipient
 
 
 class BlastAPITest(NotificationTestBase):
-
     def get_api_client(self, user):
         client = APIClient()
         client.login(username=user.email, password="testpass123")
@@ -52,7 +51,7 @@ class BlastAPITest(NotificationTestBase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["recipients"]), 1)
 
-    @patch("apps.notifications.api.send_blast.delay")
+    @patch("apps.notifications.tasks.send_blast.delay")
     def test_send_blast_via_api(self, mock_delay):
         blast = create_blast(self.team, self.admin_user)
         create_recipient(blast, self.member_user)
@@ -64,7 +63,7 @@ class BlastAPITest(NotificationTestBase):
         self.assertEqual(blast.status, BlastStatus.SENDING)
         mock_delay.assert_called_once_with(blast.pk)
 
-    @patch("apps.notifications.api.send_blast.delay")
+    @patch("apps.notifications.tasks.send_blast.delay")
     def test_cannot_send_already_sent(self, mock_delay):
         blast = create_blast(self.team, self.admin_user, status=BlastStatus.SENT)
         client = self.get_api_client(self.admin_user)

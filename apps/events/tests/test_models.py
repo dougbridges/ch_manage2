@@ -2,11 +2,7 @@
 Tests for event models: creation, validation, querysets, and managers.
 """
 
-from django.test import TestCase
 from django.utils import timezone
-
-from apps.teams.models import Team
-from apps.users.models import CustomUser
 
 from ..models import Event, EventCategory, SignupStatus, VolunteerSignup, VolunteerSlot
 from .base import EventTestBase, create_event, create_signup, create_slot
@@ -26,12 +22,16 @@ class EventModelTest(EventTestBase):
     def test_event_ordering(self):
         """Events should be ordered by start_datetime."""
         e1 = create_event(
-            self.team, self.admin_user, title="Later",
+            self.team,
+            self.admin_user,
+            title="Later",
             start_datetime=timezone.now() + timezone.timedelta(days=5),
             end_datetime=timezone.now() + timezone.timedelta(days=5, hours=2),
         )
         e2 = create_event(
-            self.team, self.admin_user, title="Sooner",
+            self.team,
+            self.admin_user,
+            title="Sooner",
             start_datetime=timezone.now() + timezone.timedelta(days=1),
             end_datetime=timezone.now() + timezone.timedelta(days=1, hours=2),
         )
@@ -132,12 +132,16 @@ class VolunteerSignupModelTest(EventTestBase):
 class EventQuerySetTest(EventTestBase):
     def test_upcoming(self):
         past = create_event(
-            self.team, self.admin_user, title="Past Event",
+            self.team,
+            self.admin_user,
+            title="Past Event",
             start_datetime=timezone.now() - timezone.timedelta(days=2),
             end_datetime=timezone.now() - timezone.timedelta(days=2, hours=-2),
         )
         future = create_event(
-            self.team, self.admin_user, title="Future Event",
+            self.team,
+            self.admin_user,
+            title="Future Event",
             start_datetime=timezone.now() + timezone.timedelta(days=2),
             end_datetime=timezone.now() + timezone.timedelta(days=2, hours=2),
         )

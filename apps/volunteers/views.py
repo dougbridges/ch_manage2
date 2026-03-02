@@ -4,13 +4,11 @@ Volunteer views: profile management, availability, rotation schedules, and shift
 Coordinators manage volunteers and rotations. Members manage their own profiles and shifts.
 """
 
-import json
 from datetime import date, timedelta
 
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -21,13 +19,11 @@ from apps.teams.decorators import login_and_team_required, team_coordinator_requ
 from .forms import GenerateShiftsForm, RotationScheduleForm, VolunteerProfileForm
 from .models import (
     Availability,
-    RotationMembership,
     RotationSchedule,
     ScheduledShift,
     ShiftStatus,
     VolunteerProfile,
 )
-
 
 # --- Volunteer List & Profiles ---
 
@@ -55,13 +51,17 @@ def volunteer_list(request, team_slug):
     paginator = Paginator(profiles, 24)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    return render(request, "volunteers/volunteer_list.html", {
-        "profiles": page_obj,
-        "page_obj": page_obj,
-        "filter_q": q,
-        "filter_active": active,
-        "active_tab": "volunteers",
-    })
+    return render(
+        request,
+        "volunteers/volunteer_list.html",
+        {
+            "profiles": page_obj,
+            "page_obj": page_obj,
+            "filter_q": q,
+            "filter_active": active,
+            "active_tab": "volunteers",
+        },
+    )
 
 
 @login_and_team_required
@@ -80,12 +80,16 @@ def my_volunteer_profile(request, team_slug):
             return redirect("volunteers:my_volunteer_profile", team_slug=team_slug)
     else:
         form = VolunteerProfileForm(instance=profile)
-    return render(request, "volunteers/volunteer_profile.html", {
-        "form": form,
-        "profile": profile,
-        "is_own_profile": True,
-        "active_tab": "volunteers",
-    })
+    return render(
+        request,
+        "volunteers/volunteer_profile.html",
+        {
+            "form": form,
+            "profile": profile,
+            "is_own_profile": True,
+            "active_tab": "volunteers",
+        },
+    )
 
 
 @team_coordinator_required
@@ -100,12 +104,16 @@ def volunteer_profile_detail(request, team_slug, pk):
             return redirect("volunteers:volunteer_profile_detail", team_slug=team_slug, pk=pk)
     else:
         form = VolunteerProfileForm(instance=profile)
-    return render(request, "volunteers/volunteer_profile.html", {
-        "form": form,
-        "profile": profile,
-        "is_own_profile": False,
-        "active_tab": "volunteers",
-    })
+    return render(
+        request,
+        "volunteers/volunteer_profile.html",
+        {
+            "form": form,
+            "profile": profile,
+            "is_own_profile": False,
+            "active_tab": "volunteers",
+        },
+    )
 
 
 # --- Availability ---
@@ -149,6 +157,7 @@ def _render_availability_calendar(request, profile, full_page=False):
 
     # Build calendar data for the month
     import calendar
+
     cal = calendar.Calendar(firstweekday=6)  # Sunday first
     month_days = cal.monthdayscalendar(year, month)
 
@@ -199,10 +208,14 @@ def _render_availability_calendar(request, profile, full_page=False):
 def rotation_list(request, team_slug):
     """List all rotation schedules for the team."""
     rotations = RotationSchedule.objects.filter(team=request.team).select_related("event")
-    return render(request, "volunteers/rotation_list.html", {
-        "rotations": rotations,
-        "active_tab": "volunteers",
-    })
+    return render(
+        request,
+        "volunteers/rotation_list.html",
+        {
+            "rotations": rotations,
+            "active_tab": "volunteers",
+        },
+    )
 
 
 @team_coordinator_required
@@ -218,10 +231,14 @@ def rotation_create(request, team_slug):
             return redirect("volunteers:rotation_detail", team_slug=team_slug, pk=rotation.pk)
     else:
         form = RotationScheduleForm(team=request.team)
-    return render(request, "volunteers/rotation_form.html", {
-        "form": form,
-        "active_tab": "volunteers",
-    })
+    return render(
+        request,
+        "volunteers/rotation_form.html",
+        {
+            "form": form,
+            "active_tab": "volunteers",
+        },
+    )
 
 
 @team_coordinator_required
@@ -229,15 +246,23 @@ def rotation_detail(request, team_slug, pk):
     """View a rotation schedule with its members and upcoming shifts."""
     rotation = get_object_or_404(RotationSchedule, pk=pk, team=request.team)
     memberships = rotation.memberships.select_related("volunteer__user").order_by("order")
-    upcoming_shifts = rotation.shifts.filter(
-        date__gte=timezone.now().date(),
-    ).select_related("volunteer__user").order_by("date")[:20]
-    return render(request, "volunteers/rotation_detail.html", {
-        "rotation": rotation,
-        "memberships": memberships,
-        "upcoming_shifts": upcoming_shifts,
-        "active_tab": "volunteers",
-    })
+    upcoming_shifts = (
+        rotation.shifts.filter(
+            date__gte=timezone.now().date(),
+        )
+        .select_related("volunteer__user")
+        .order_by("date")[:20]
+    )
+    return render(
+        request,
+        "volunteers/rotation_detail.html",
+        {
+            "rotation": rotation,
+            "memberships": memberships,
+            "upcoming_shifts": upcoming_shifts,
+            "active_tab": "volunteers",
+        },
+    )
 
 
 @team_coordinator_required
@@ -252,11 +277,15 @@ def rotation_edit(request, team_slug, pk):
             return redirect("volunteers:rotation_detail", team_slug=team_slug, pk=pk)
     else:
         form = RotationScheduleForm(instance=rotation, team=request.team)
-    return render(request, "volunteers/rotation_form.html", {
-        "form": form,
-        "rotation": rotation,
-        "active_tab": "volunteers",
-    })
+    return render(
+        request,
+        "volunteers/rotation_form.html",
+        {
+            "form": form,
+            "rotation": rotation,
+            "active_tab": "volunteers",
+        },
+    )
 
 
 @team_coordinator_required
@@ -270,6 +299,7 @@ def rotation_generate(request, team_slug, pk):
             end = form.cleaned_data["end_date"]
 
             from .tasks import _get_schedule_dates
+
             dates = _get_schedule_dates(rotation, start, end)
             if not dates:
                 # Fall back: generate weekly dates
@@ -280,6 +310,7 @@ def rotation_generate(request, team_slug, pk):
                     current += timedelta(days=7)
 
             from .rotation import generate_rotation
+
             shifts = generate_rotation(rotation, dates)
             messages.success(
                 request,
@@ -295,11 +326,15 @@ def rotation_shifts(request, team_slug, pk):
     """View and manage all shifts for a rotation."""
     rotation = get_object_or_404(RotationSchedule, pk=pk, team=request.team)
     shifts = rotation.shifts.select_related("volunteer__user").order_by("date")
-    return render(request, "volunteers/rotation_shifts.html", {
-        "rotation": rotation,
-        "shifts": shifts,
-        "active_tab": "volunteers",
-    })
+    return render(
+        request,
+        "volunteers/rotation_shifts.html",
+        {
+            "rotation": rotation,
+            "shifts": shifts,
+            "active_tab": "volunteers",
+        },
+    )
 
 
 # --- My Shifts ---
@@ -310,17 +345,25 @@ def my_shifts(request, team_slug):
     """View own upcoming shifts."""
     profile = VolunteerProfile.objects.filter(team=request.team, user=request.user).first()
     if profile:
-        shifts = ScheduledShift.objects.filter(
-            volunteer=profile,
-            date__gte=timezone.now().date(),
-        ).select_related("schedule", "event").order_by("date")
+        shifts = (
+            ScheduledShift.objects.filter(
+                volunteer=profile,
+                date__gte=timezone.now().date(),
+            )
+            .select_related("schedule", "event")
+            .order_by("date")
+        )
     else:
         shifts = ScheduledShift.objects.none()
-    return render(request, "volunteers/my_shifts.html", {
-        "shifts": shifts,
-        "profile": profile,
-        "active_tab": "volunteers",
-    })
+    return render(
+        request,
+        "volunteers/my_shifts.html",
+        {
+            "shifts": shifts,
+            "profile": profile,
+            "active_tab": "volunteers",
+        },
+    )
 
 
 @login_and_team_required

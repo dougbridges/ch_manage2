@@ -2,11 +2,10 @@
 Tests for the events REST API.
 """
 
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from .base import EventTestBase, create_event, create_slot, create_signup
+from .base import EventTestBase, create_event, create_signup, create_slot
 
 
 class EventAPITest(EventTestBase):

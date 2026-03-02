@@ -36,14 +36,20 @@ def notify_event_created(event):
             continue
 
         try:
-            body_html = render_to_string("events/email/event_announcement.html", {
-                "event": event,
-                "user": user,
-            })
-            body_text = render_to_string("events/email/event_announcement.txt", {
-                "event": event,
-                "user": user,
-            })
+            body_html = render_to_string(
+                "events/email/event_announcement.html",
+                {
+                    "event": event,
+                    "user": user,
+                },
+            )
+            body_text = render_to_string(
+                "events/email/event_announcement.txt",
+                {
+                    "event": event,
+                    "user": user,
+                },
+            )
             backend.send_email(
                 recipient_email=user.email,
                 subject=f"New Event: {event.title}",
@@ -70,9 +76,14 @@ def notify_event_updated(event, changes: list[str]):
 
     # Get unique volunteers signed up for this event
     from .models import VolunteerSignup
-    signups = VolunteerSignup.objects.filter(
-        slot__event=event,
-    ).exclude(status="cancelled").select_related("volunteer")
+
+    signups = (
+        VolunteerSignup.objects.filter(
+            slot__event=event,
+        )
+        .exclude(status="cancelled")
+        .select_related("volunteer")
+    )
 
     notified_users = set()
     sent_count = 0
@@ -84,16 +95,22 @@ def notify_event_updated(event, changes: list[str]):
         notified_users.add(user.pk)
 
         try:
-            body_html = render_to_string("events/email/event_updated.html", {
-                "event": event,
-                "user": user,
-                "changes": changes,
-            })
-            body_text = render_to_string("events/email/event_updated.txt", {
-                "event": event,
-                "user": user,
-                "changes": changes,
-            })
+            body_html = render_to_string(
+                "events/email/event_updated.html",
+                {
+                    "event": event,
+                    "user": user,
+                    "changes": changes,
+                },
+            )
+            body_text = render_to_string(
+                "events/email/event_updated.txt",
+                {
+                    "event": event,
+                    "user": user,
+                    "changes": changes,
+                },
+            )
             backend.send_email(
                 recipient_email=user.email,
                 subject=f"Event Updated: {event.title}",
@@ -112,21 +129,27 @@ def notify_signup_confirmation(signup):
     """
     Send a confirmation email to a volunteer who just signed up for a slot.
     """
-    backend = get_email_backend()
     user = signup.volunteer
     event = signup.slot.event
 
     try:
-        body_html = render_to_string("events/email/signup_confirmation.html", {
-            "signup": signup,
-            "event": event,
-            "user": user,
-        })
-        body_text = render_to_string("events/email/signup_confirmation.txt", {
-            "signup": signup,
-            "event": event,
-            "user": user,
-        })
+        backend = get_email_backend()
+        body_html = render_to_string(
+            "events/email/signup_confirmation.html",
+            {
+                "signup": signup,
+                "event": event,
+                "user": user,
+            },
+        )
+        body_text = render_to_string(
+            "events/email/signup_confirmation.txt",
+            {
+                "signup": signup,
+                "event": event,
+                "user": user,
+            },
+        )
         backend.send_email(
             recipient_email=user.email,
             subject=f"Signup Confirmed: {signup.slot.role_name} for {event.title}",

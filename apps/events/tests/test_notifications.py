@@ -8,16 +8,13 @@ from django.test import override_settings
 
 from apps.notifications.models import ContactPreference
 
-from ..models import SignupStatus, VolunteerSignup
+from ..models import SignupStatus
 from ..notifications import notify_event_created, notify_event_updated, notify_signup_confirmation
-from .base import EventTestBase, create_event, create_slot, create_signup
+from .base import EventTestBase, create_event, create_signup, create_slot
 
 
-@override_settings(
-    NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-)
+@override_settings(NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
 class NotifyEventCreatedTest(EventTestBase):
-
     def test_sends_to_all_members(self):
         event = create_event(self.team, self.admin_user)
         count = notify_event_created(event)
@@ -30,19 +27,14 @@ class NotifyEventCreatedTest(EventTestBase):
         self.assertIsNone(count)
 
     def test_respects_email_opt_out(self):
-        ContactPreference.objects.create(
-            team=self.team, user=self.member_user, receive_email=False
-        )
+        ContactPreference.objects.create(team=self.team, user=self.member_user, receive_email=False)
         event = create_event(self.team, self.admin_user)
         count = notify_event_created(event)
         self.assertEqual(count, 2)  # member opted out
 
 
-@override_settings(
-    NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-)
+@override_settings(NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
 class NotifyEventUpdatedTest(EventTestBase):
-
     def test_notifies_signed_up_volunteers(self):
         event = create_event(self.team, self.admin_user)
         slot = create_slot(event)
@@ -75,11 +67,8 @@ class NotifyEventUpdatedTest(EventTestBase):
         self.assertEqual(count, 0)
 
 
-@override_settings(
-    NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-)
+@override_settings(NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
 class NotifySignupConfirmationTest(EventTestBase):
-
     def test_sends_confirmation(self):
         event = create_event(self.team, self.admin_user)
         slot = create_slot(event)

@@ -30,6 +30,7 @@ class MessageBlastModelTest(NotificationTestBase):
         blast1 = create_blast(self.team, self.admin_user, subject="First")
         blast2 = create_blast(self.team, self.admin_user, subject="Second")
         from ..models import MessageBlast
+
         blasts = list(MessageBlast.objects.filter(team=self.team))
         self.assertEqual(blasts[0], blast2)  # newest first
         self.assertEqual(blasts[1], blast1)
@@ -83,6 +84,7 @@ class MessageRecipientModelTest(NotificationTestBase):
         blast_pk = blast.pk
         blast.delete()
         from ..models import MessageRecipient
+
         self.assertEqual(MessageRecipient.objects.filter(blast_id=blast_pk).count(), 0)
 
 

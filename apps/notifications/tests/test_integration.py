@@ -8,17 +8,13 @@ from unittest.mock import patch
 from django.test import override_settings
 from django.utils import timezone
 
-from apps.events.models import Event, EventCategory, VolunteerSlot, VolunteerSignup
+from apps.events.models import Event, EventCategory, VolunteerSignup, VolunteerSlot
 from apps.events.notifications import notify_event_created, notify_event_updated
 from apps.notifications.models import (
     BlastStatus,
-    ContactPreference,
-    MessageBlast,
-    MessageRecipient,
     NotificationChannel,
     RecipientStatus,
 )
-from apps.volunteers.models import RotationSchedule, RotationStrategy, ScheduledShift, ShiftStatus, VolunteerProfile
 
 from .base import NotificationTestBase, create_blast, create_preference, create_recipient
 
@@ -37,6 +33,7 @@ class FullNotificationFlowTest(NotificationTestBase):
         r2 = create_recipient(blast, self.coordinator_user)
 
         from apps.notifications.tasks import send_blast
+
         send_blast(blast.pk)
 
         blast.refresh_from_db()
@@ -48,6 +45,7 @@ class FullNotificationFlowTest(NotificationTestBase):
         recipient = create_recipient(blast, self.member_user)
 
         from apps.notifications.tasks import send_single_notification
+
         send_single_notification(recipient.pk)
 
         recipient.refresh_from_db()
@@ -73,9 +71,7 @@ class FullNotificationFlowTest(NotificationTestBase):
         self.assertEqual(count, 2)
 
 
-@override_settings(
-    NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-)
+@override_settings(NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
 class EventVolunteerNotificationTest(NotificationTestBase):
     """Integration: event updates notify signed-up volunteers."""
 
@@ -89,15 +85,9 @@ class EventVolunteerNotificationTest(NotificationTestBase):
             created_by=self.admin_user,
             is_published=True,
         )
-        slot = VolunteerSlot.objects.create(
-            event=event, team=self.team, role_name="Ushers", slots_needed=3
-        )
-        VolunteerSignup.objects.create(
-            slot=slot, volunteer=self.member_user, team=self.team
-        )
-        VolunteerSignup.objects.create(
-            slot=slot, volunteer=self.coordinator_user, team=self.team
-        )
+        slot = VolunteerSlot.objects.create(event=event, team=self.team, role_name="Ushers", slots_needed=3)
+        VolunteerSignup.objects.create(slot=slot, volunteer=self.member_user, team=self.team)
+        VolunteerSignup.objects.create(slot=slot, volunteer=self.coordinator_user, team=self.team)
 
         count = notify_event_updated(event, ["Time changed to 10:00 AM"])
         self.assertEqual(count, 2)
@@ -114,5 +104,6 @@ class EventVolunteerNotificationTest(NotificationTestBase):
 
         with patch("apps.notifications.tasks.send_blast.delay") as mock_delay:
             from apps.notifications.tasks import send_scheduled_blasts
+
             send_scheduled_blasts()
             mock_delay.assert_called_once_with(blast.pk)

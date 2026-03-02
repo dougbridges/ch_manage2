@@ -73,6 +73,7 @@ def send_single_notification(self, recipient_id: int):
             )
         elif recipient.channel == NotificationChannel.SMS:
             from .models import ContactPreference
+
             pref = ContactPreference.objects.filter(team=blast.team, user=user).first()
             if not pref or not pref.phone_number:
                 recipient.status = RecipientStatus.FAILED

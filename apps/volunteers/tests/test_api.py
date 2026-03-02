@@ -10,7 +10,6 @@ from rest_framework.test import APIClient
 from ..models import ShiftStatus
 from .base import (
     VolunteerTestBase,
-    add_rotation_member,
     create_event,
     create_rotation,
     create_shift,
@@ -19,7 +18,6 @@ from .base import (
 
 
 class VolunteerProfileAPITest(VolunteerTestBase):
-
     def get_api_client(self, user):
         client = APIClient()
         client.login(username=user.email, password="testpass123")
@@ -59,7 +57,6 @@ class VolunteerProfileAPITest(VolunteerTestBase):
 
 
 class ShiftAPITest(VolunteerTestBase):
-
     def get_api_client(self, user):
         client = APIClient()
         client.login(username=user.email, password="testpass123")

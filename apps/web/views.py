@@ -2,7 +2,6 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
-from django.db.models import Count, Q
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse

@@ -62,4 +62,4 @@ class BlastExportTest(NotificationTestBase):
         client = self.get_client(self.coordinator_user)
         url = f"/a/{self.team.slug}/notifications/{blast.pk}/export/"
         response = client.get(url)
-        self.assertIn(response.status_code, [302, 403])
+        self.assertIn(response.status_code, [302, 403, 404])

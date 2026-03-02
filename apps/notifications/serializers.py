@@ -24,12 +24,29 @@ class MessageBlastListSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageBlast
         fields = [
-            "id", "subject", "body", "channel", "status", "send_at",
-            "sent_at", "created_by", "created_by_name",
-            "recipient_count", "sent_count", "created_at",
+            "id",
+            "subject",
+            "body",
+            "channel",
+            "status",
+            "send_at",
+            "sent_at",
+            "created_by",
+            "created_by_name",
+            "recipient_count",
+            "sent_count",
+            "created_at",
         ]
-        read_only_fields = ["id", "status", "sent_at", "created_by", "created_by_name",
-                           "recipient_count", "sent_count", "created_at"]
+        read_only_fields = [
+            "id",
+            "status",
+            "sent_at",
+            "created_by",
+            "created_by_name",
+            "recipient_count",
+            "sent_count",
+            "created_at",
+        ]
 
 
 class MessageBlastDetailSerializer(serializers.ModelSerializer):
@@ -39,12 +56,20 @@ class MessageBlastDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageBlast
         fields = [
-            "id", "subject", "body", "channel", "status", "send_at",
-            "sent_at", "created_by", "created_by_name", "recipient_filter",
-            "recipients", "created_at",
+            "id",
+            "subject",
+            "body",
+            "channel",
+            "status",
+            "send_at",
+            "sent_at",
+            "created_by",
+            "created_by_name",
+            "recipient_filter",
+            "recipients",
+            "created_at",
         ]
-        read_only_fields = ["id", "status", "sent_at", "created_by", "created_by_name",
-                           "recipients", "created_at"]
+        read_only_fields = ["id", "status", "sent_at", "created_by", "created_by_name", "recipients", "created_at"]
 
 
 class MessageBlastWriteSerializer(serializers.ModelSerializer):

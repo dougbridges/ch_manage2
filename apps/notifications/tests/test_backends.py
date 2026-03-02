@@ -2,7 +2,6 @@
 Tests for notification backends: ConsoleBackend, DjangoEmailBackend, backend loader.
 """
 
-from unittest.mock import patch
 
 from django.core import mail
 from django.test import TestCase, override_settings
@@ -18,12 +17,12 @@ class ConsoleBackendTest(TestCase):
     def test_send_email(self):
         backend = ConsoleBackend()
         result = backend.send_email("user@example.com", "Test", "<p>Hi</p>", "Hi")
-        self.assertEqual(result, "console")
+        self.assertEqual(result, "console-email-user@example.com")
 
     def test_send_sms(self):
         backend = ConsoleBackend()
         result = backend.send_sms("+15551234567", "Hello via SMS")
-        self.assertEqual(result, "console")
+        self.assertEqual(result, "console-sms-+15551234567")
 
 
 class DjangoEmailBackendTest(TestCase):
@@ -46,23 +45,17 @@ class DjangoEmailBackendTest(TestCase):
 class BackendLoaderTest(TestCase):
     """Tests for the backend loader utility."""
 
-    @override_settings(
-        NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-    )
+    @override_settings(NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
     def test_load_email_backend(self):
         backend = get_email_backend()
         self.assertIsInstance(backend, ConsoleBackend)
 
-    @override_settings(
-        NOTIFICATION_SMS_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-    )
+    @override_settings(NOTIFICATION_SMS_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
     def test_load_sms_backend(self):
         backend = get_sms_backend()
         self.assertIsInstance(backend, ConsoleBackend)
 
-    @override_settings(
-        NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.email_backend.DjangoEmailBackend"
-    )
+    @override_settings(NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.email_backend.DjangoEmailBackend")
     def test_load_django_email_backend(self):
         backend = get_email_backend()
         self.assertIsInstance(backend, DjangoEmailBackend)

@@ -31,11 +31,15 @@ def slot_create(request, team_slug, event_pk):
             return redirect("events:event_detail", team_slug=team_slug, pk=event.pk)
     else:
         form = VolunteerSlotForm()
-    return render(request, "events/components/slot_form.html", {
-        "form": form,
-        "event": event,
-        "active_tab": "events",
-    })
+    return render(
+        request,
+        "events/components/slot_form.html",
+        {
+            "form": form,
+            "event": event,
+            "active_tab": "events",
+        },
+    )
 
 
 @team_coordinator_required
@@ -51,12 +55,16 @@ def slot_edit(request, team_slug, event_pk, slot_pk):
             return redirect("events:event_detail", team_slug=team_slug, pk=event.pk)
     else:
         form = VolunteerSlotForm(instance=slot)
-    return render(request, "events/components/slot_form.html", {
-        "form": form,
-        "event": event,
-        "slot": slot,
-        "active_tab": "events",
-    })
+    return render(
+        request,
+        "events/components/slot_form.html",
+        {
+            "form": form,
+            "event": event,
+            "slot": slot,
+            "active_tab": "events",
+        },
+    )
 
 
 @team_coordinator_required
@@ -101,10 +109,14 @@ def slot_signup(request, team_slug, event_pk, slot_pk):
         # Return HTMX partial or redirect
         if request.htmx:
             slots = event.volunteer_slots.prefetch_related("signups__volunteer").all()
-            return render(request, "events/components/slot_list.html", {
-                "event": event,
-                "slots": slots,
-            })
+            return render(
+                request,
+                "events/components/slot_list.html",
+                {
+                    "event": event,
+                    "slots": slots,
+                },
+            )
         return redirect("events:event_detail", team_slug=team_slug, pk=event.pk)
     raise Http404
 
@@ -116,9 +128,11 @@ def slot_cancel_signup(request, team_slug, event_pk, slot_pk):
     slot = get_object_or_404(VolunteerSlot, pk=slot_pk, event=event)
 
     if request.method == "POST":
-        signup = VolunteerSignup.objects.filter(
-            slot=slot, volunteer=request.user
-        ).exclude(status=SignupStatus.CANCELLED).first()
+        signup = (
+            VolunteerSignup.objects.filter(slot=slot, volunteer=request.user)
+            .exclude(status=SignupStatus.CANCELLED)
+            .first()
+        )
         if signup:
             signup.status = SignupStatus.CANCELLED
             signup.save()
@@ -128,9 +142,13 @@ def slot_cancel_signup(request, team_slug, event_pk, slot_pk):
 
         if request.htmx:
             slots = event.volunteer_slots.prefetch_related("signups__volunteer").all()
-            return render(request, "events/components/slot_list.html", {
-                "event": event,
-                "slots": slots,
-            })
+            return render(
+                request,
+                "events/components/slot_list.html",
+                {
+                    "event": event,
+                    "slots": slots,
+                },
+            )
         return redirect("events:event_detail", team_slug=team_slug, pk=event.pk)
     raise Http404

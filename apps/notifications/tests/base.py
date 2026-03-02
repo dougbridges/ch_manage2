@@ -5,7 +5,6 @@ Provides factory functions and a base test class for notification tests.
 """
 
 from django.test import Client, TestCase, override_settings
-from django.utils import timezone
 
 from apps.teams.models import Membership, Team
 from apps.teams.roles import ROLE_ADMIN, ROLE_COORDINATOR, ROLE_MEMBER

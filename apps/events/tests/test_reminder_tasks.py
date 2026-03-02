@@ -10,11 +10,8 @@ from django.utils import timezone
 from .base import EventTestBase, create_event
 
 
-@override_settings(
-    NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend"
-)
+@override_settings(NOTIFICATION_EMAIL_BACKEND="apps.notifications.backends.console_backend.ConsoleBackend")
 class SendEventRemindersTaskTest(EventTestBase):
-
     def test_sends_reminders_for_upcoming_events(self):
         # Event in 24 hours (within the 48h default window)
         create_event(
@@ -26,6 +23,7 @@ class SendEventRemindersTaskTest(EventTestBase):
         )
 
         from ..tasks import send_event_reminders
+
         # Should not raise
         send_event_reminders(hours_ahead=48)
 
@@ -39,6 +37,7 @@ class SendEventRemindersTaskTest(EventTestBase):
         )
 
         from ..tasks import send_event_reminders
+
         send_event_reminders(hours_ahead=48)
         # Should complete without error, sending nothing for past events
 
@@ -52,6 +51,7 @@ class SendEventRemindersTaskTest(EventTestBase):
         )
 
         from ..tasks import send_event_reminders
+
         send_event_reminders(hours_ahead=48)
         # Should complete without sending for events outside the window
 
@@ -66,4 +66,5 @@ class SendEventRemindersTaskTest(EventTestBase):
         )
 
         from ..tasks import send_event_reminders
+
         send_event_reminders(hours_ahead=48)

@@ -14,8 +14,15 @@ class VolunteerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = VolunteerProfile
         fields = [
-            "id", "user", "user_name", "user_email", "skills",
-            "max_services_per_month", "is_active", "notes", "created_at",
+            "id",
+            "user",
+            "user_name",
+            "user_email",
+            "skills",
+            "max_services_per_month",
+            "is_active",
+            "notes",
+            "created_at",
         ]
         read_only_fields = ["id", "user", "user_name", "user_email", "created_at"]
 
@@ -28,8 +35,27 @@ class ScheduledShiftSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScheduledShift
         fields = [
-            "id", "schedule", "schedule_name", "volunteer", "volunteer_name",
-            "event", "event_title", "date", "status", "reminder_sent", "created_at",
+            "id",
+            "schedule",
+            "schedule_name",
+            "volunteer",
+            "volunteer_name",
+            "event",
+            "event_title",
+            "date",
+            "status",
+            "reminder_sent",
+            "created_at",
         ]
-        read_only_fields = ["id", "schedule", "schedule_name", "volunteer", "volunteer_name",
-                           "event", "event_title", "date", "reminder_sent", "created_at"]
+        read_only_fields = [
+            "id",
+            "schedule",
+            "schedule_name",
+            "volunteer",
+            "volunteer_name",
+            "event",
+            "event_title",
+            "date",
+            "reminder_sent",
+            "created_at",
+        ]

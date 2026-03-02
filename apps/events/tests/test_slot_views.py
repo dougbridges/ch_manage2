@@ -2,7 +2,6 @@
 Tests for volunteer slot CRUD and signup/cancel views.
 """
 
-from django.test import Client
 from django.urls import reverse
 
 from ..models import SignupStatus, VolunteerSignup, VolunteerSlot

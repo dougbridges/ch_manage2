@@ -5,8 +5,6 @@ Provides CSV downloads for event signups and event listings.
 Only available to coordinators and admins.
 """
 
-
-
 import csv
 
 from django.http import HttpResponse
@@ -31,24 +29,28 @@ def export_event_signups(request, team_slug, pk):
     response["Content-Disposition"] = f'attachment; filename="event-{event.pk}-signups.csv"'
 
     writer = csv.writer(response)
-    writer.writerow([
-        str(_("Role")),
-        str(_("Volunteer Name")),
-        str(_("Email")),
-        str(_("Status")),
-        str(_("Note")),
-        str(_("Signed Up At")),
-    ])
+    writer.writerow(
+        [
+            str(_("Role")),
+            str(_("Volunteer Name")),
+            str(_("Email")),
+            str(_("Status")),
+            str(_("Note")),
+            str(_("Signed Up At")),
+        ]
+    )
 
     for signup in signups:
-        writer.writerow([
-            signup.slot.role_name,
-            signup.volunteer.get_full_name() or signup.volunteer.email,
-            signup.volunteer.email,
-            signup.get_status_display(),
-            signup.note,
-            signup.created_at.strftime("%Y-%m-%d %H:%M") if signup.created_at else "",
-        ])
+        writer.writerow(
+            [
+                signup.slot.role_name,
+                signup.volunteer.get_full_name() or signup.volunteer.email,
+                signup.volunteer.email,
+                signup.get_status_display(),
+                signup.note,
+                signup.created_at.strftime("%Y-%m-%d %H:%M") if signup.created_at else "",
+            ]
+        )
 
     return response
 
@@ -62,25 +64,29 @@ def export_events_list(request, team_slug):
     response["Content-Disposition"] = 'attachment; filename="events.csv"'
 
     writer = csv.writer(response)
-    writer.writerow([
-        str(_("Title")),
-        str(_("Category")),
-        str(_("Start")),
-        str(_("End")),
-        str(_("Location")),
-        str(_("Published")),
-        str(_("Created By")),
-    ])
+    writer.writerow(
+        [
+            str(_("Title")),
+            str(_("Category")),
+            str(_("Start")),
+            str(_("End")),
+            str(_("Location")),
+            str(_("Published")),
+            str(_("Created By")),
+        ]
+    )
 
     for event in events:
-        writer.writerow([
-            event.title,
-            event.get_category_display(),
-            event.start_datetime.strftime("%Y-%m-%d %H:%M"),
-            event.end_datetime.strftime("%Y-%m-%d %H:%M"),
-            event.location,
-            str(_("Yes")) if event.is_published else str(_("No")),
-            event.created_by.get_full_name() if event.created_by else "",
-        ])
+        writer.writerow(
+            [
+                event.title,
+                event.get_category_display(),
+                event.start_datetime.strftime("%Y-%m-%d %H:%M"),
+                event.end_datetime.strftime("%Y-%m-%d %H:%M"),
+                event.location,
+                str(_("Yes")) if event.is_published else str(_("No")),
+                event.created_by.get_full_name() if event.created_by else "",
+            ]
+        )
 
     return response

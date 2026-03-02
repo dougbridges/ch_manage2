@@ -8,7 +8,7 @@ the correct access levels to each view.
 from django.test import Client
 from django.urls import reverse
 
-from apps.teams.roles import ROLE_ADMIN, ROLE_COORDINATOR, ROLE_MEMBER, is_coordinator
+from apps.teams.roles import is_coordinator
 
 from .base import EventTestBase, create_event, create_slot
 
@@ -27,6 +27,7 @@ class RolePermissionTest(EventTestBase):
 
     def test_anonymous_is_not_coordinator(self):
         from django.contrib.auth.models import AnonymousUser
+
         self.assertFalse(is_coordinator(AnonymousUser(), self.team))
 
 
@@ -39,7 +40,8 @@ class EventViewPermissionMatrix(EventTestBase):
         client = self.get_client(user)
         response = client.get(url)
         self.assertEqual(
-            response.status_code, expected_status,
+            response.status_code,
+            expected_status,
             f"{user.email} expected {expected_status} at {url}, got {response.status_code}",
         )
 
@@ -95,7 +97,8 @@ class EventViewPermissionMatrix(EventTestBase):
         for url in urls:
             response = anon_client.get(url)
             self.assertEqual(
-                response.status_code, 302,
+                response.status_code,
+                302,
                 f"Anonymous should be redirected from {url}",
             )
             self.assertIn("login", response.url)

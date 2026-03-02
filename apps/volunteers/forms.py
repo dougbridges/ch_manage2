@@ -8,7 +8,7 @@ and rotation schedule creation/editing.
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from .models import RotationMembership, RotationSchedule, VolunteerProfile
+from .models import RotationSchedule, VolunteerProfile
 
 
 class VolunteerProfileForm(forms.ModelForm):
@@ -40,6 +40,7 @@ class RotationScheduleForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if team:
             from apps.events.models import Event
+
             self.fields["event"].queryset = Event.objects.filter(team=team)
 
 

@@ -4,8 +4,8 @@ Email notification backend using Django's built-in send_mail.
 
 import logging
 
-from django.core.mail import send_mail
 from django.conf import settings
+from django.core.mail import send_mail
 
 from .base import NotificationBackend
 
