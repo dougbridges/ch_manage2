@@ -69,6 +69,11 @@ class Event(BaseTeamModel):
         ordering = ["start_datetime"]
         verbose_name = _("event")
         verbose_name_plural = _("events")
+        indexes = [
+            models.Index(fields=["team", "start_datetime"], name="event_team_start"),
+            models.Index(fields=["team", "is_published", "start_datetime"], name="event_team_pub_start"),
+            models.Index(fields=["category"], name="event_category"),
+        ]
 
     def __str__(self) -> str:
         return self.title

@@ -8,6 +8,8 @@ import json
 from datetime import date, timedelta
 
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -32,10 +34,32 @@ from .models import (
 
 @team_coordinator_required
 def volunteer_list(request, team_slug):
-    """List all volunteer profiles for the team."""
+    """List all volunteer profiles for the team with optional filtering."""
     profiles = VolunteerProfile.objects.filter(team=request.team).select_related("user").order_by("user__first_name")
+
+    # Search by name
+    q = request.GET.get("q", "")
+    if q:
+        profiles = profiles.filter(
+            Q(user__first_name__icontains=q) | Q(user__last_name__icontains=q) | Q(user__email__icontains=q)
+        )
+
+    # Active filter
+    active = request.GET.get("active", "")
+    if active == "yes":
+        profiles = profiles.filter(is_active=True)
+    elif active == "no":
+        profiles = profiles.filter(is_active=False)
+
+    # Pagination
+    paginator = Paginator(profiles, 24)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
     return render(request, "volunteers/volunteer_list.html", {
-        "profiles": profiles,
+        "profiles": page_obj,
+        "page_obj": page_obj,
+        "filter_q": q,
+        "filter_active": active,
         "active_tab": "volunteers",
     })
 

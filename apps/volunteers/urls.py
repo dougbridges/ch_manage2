@@ -6,7 +6,7 @@ All patterns are team-scoped and mounted at /a/<team_slug>/volunteers/.
 
 from django.urls import path
 
-from . import views
+from . import exports, views
 
 app_name = "volunteers"
 
@@ -28,4 +28,7 @@ team_urlpatterns = [
     path("shifts/my/", views.my_shifts, name="my_shifts"),
     path("shifts/<int:pk>/confirm/", views.shift_confirm, name="shift_confirm"),
     path("shifts/<int:pk>/decline/", views.shift_decline, name="shift_decline"),
+    # Exports
+    path("export/roster/", exports.export_volunteer_roster, name="export_roster"),
+    path("export/shifts/", exports.export_shift_schedule, name="export_shifts"),
 ]

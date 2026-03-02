@@ -21,6 +21,7 @@ class RotationMembershipInline(admin.TabularInline):
 class VolunteerProfileAdmin(admin.ModelAdmin):
     list_display = ("user", "team", "is_active", "max_services_per_month")
     list_filter = ("team", "is_active")
+    search_fields = ("user__first_name", "user__last_name", "user__email")
     inlines = [AvailabilityInline]
 
 
@@ -28,16 +29,20 @@ class VolunteerProfileAdmin(admin.ModelAdmin):
 class AvailabilityAdmin(admin.ModelAdmin):
     list_display = ("volunteer", "date", "is_available")
     list_filter = ("is_available",)
+    date_hierarchy = "date"
 
 
 @admin.register(RotationSchedule)
 class RotationScheduleAdmin(admin.ModelAdmin):
     list_display = ("name", "team", "rotation_strategy", "is_active")
     list_filter = ("team", "rotation_strategy", "is_active")
+    search_fields = ("name",)
     inlines = [RotationMembershipInline]
 
 
 @admin.register(ScheduledShift)
 class ScheduledShiftAdmin(admin.ModelAdmin):
     list_display = ("volunteer", "schedule", "date", "status", "reminder_sent")
-    list_filter = ("status", "reminder_sent")
+    list_filter = ("status", "reminder_sent", "team")
+    search_fields = ("volunteer__user__first_name", "volunteer__user__last_name", "schedule__name")
+    date_hierarchy = "date"

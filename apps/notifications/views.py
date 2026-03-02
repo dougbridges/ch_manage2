@@ -6,6 +6,7 @@ All team members can manage their own contact preferences.
 """
 
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -19,10 +20,36 @@ from .models import BlastStatus, ContactPreference, MessageBlast, MessageRecipie
 
 @team_coordinator_required
 def blast_list(request, team_slug):
-    """List sent and scheduled message blasts."""
+    """List sent and scheduled message blasts with optional filtering."""
     blasts = MessageBlast.objects.filter(team=request.team).order_by("-created_at")
+
+    # Status filter
+    status = request.GET.get("status", "")
+    if status:
+        blasts = blasts.filter(status=status)
+
+    # Channel filter
+    channel = request.GET.get("channel", "")
+    if channel:
+        blasts = blasts.filter(channel=channel)
+
+    # Search by subject
+    q = request.GET.get("q", "")
+    if q:
+        blasts = blasts.filter(subject__icontains=q)
+
+    # Pagination
+    paginator = Paginator(blasts, 20)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
     return render(request, "notifications/blast_list.html", {
-        "blasts": blasts,
+        "blasts": page_obj,
+        "page_obj": page_obj,
+        "statuses": BlastStatus.choices,
+        "channels": NotificationChannel.choices,
+        "filter_status": status,
+        "filter_channel": channel,
+        "filter_q": q,
         "active_tab": "notifications",
     })
 

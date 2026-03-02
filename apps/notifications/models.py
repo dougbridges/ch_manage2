@@ -80,6 +80,11 @@ class MessageBlast(BaseTeamModel):
         ordering = ["-created_at"]
         verbose_name = _("message blast")
         verbose_name_plural = _("message blasts")
+        indexes = [
+            models.Index(fields=["team", "status"], name="blast_team_status"),
+            models.Index(fields=["team", "-created_at"], name="blast_team_created"),
+            models.Index(fields=["status", "send_at"], name="blast_status_send_at"),
+        ]
 
     def __str__(self) -> str:
         if self.subject:
@@ -138,6 +143,9 @@ class MessageRecipient(BaseTeamModel):
         unique_together = ["blast", "user", "channel"]
         verbose_name = _("message recipient")
         verbose_name_plural = _("message recipients")
+        indexes = [
+            models.Index(fields=["blast", "status"], name="recipient_blast_status"),
+        ]
 
     def __str__(self) -> str:
         return f"{self.user} — {self.blast} ({self.get_status_display()})"

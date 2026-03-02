@@ -6,6 +6,7 @@ All views are team-scoped and use function-based views with permission decorator
 """
 
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
@@ -13,15 +14,49 @@ from django.utils.translation import gettext_lazy as _
 from apps.teams.decorators import login_and_team_required, team_admin_required, team_coordinator_required
 
 from .forms import EventForm
-from .models import Event
+from .models import Event, EventCategory
 
 
 @login_and_team_required
 def event_list(request, team_slug):
-    """List upcoming events for the team."""
-    events = Event.objects.filter(team=request.team, is_published=True).order_by("start_datetime")
+    """List upcoming events for the team with optional filtering."""
+    events = (
+        Event.objects.filter(team=request.team, is_published=True)
+        .select_related("created_by")
+        .prefetch_related("volunteer_slots")
+        .order_by("start_datetime")
+    )
+
+    # Category filter
+    category = request.GET.get("category", "")
+    if category:
+        events = events.filter(category=category)
+
+    # Date range filter
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
+    if date_from:
+        events = events.filter(start_datetime__date__gte=date_from)
+    if date_to:
+        events = events.filter(start_datetime__date__lte=date_to)
+
+    # Search by title
+    q = request.GET.get("q", "")
+    if q:
+        events = events.filter(title__icontains=q)
+
+    # Pagination
+    paginator = Paginator(events, 20)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
     return render(request, "events/event_list.html", {
-        "events": events,
+        "events": page_obj,
+        "page_obj": page_obj,
+        "categories": EventCategory.choices,
+        "filter_category": category,
+        "filter_date_from": date_from,
+        "filter_date_to": date_to,
+        "filter_q": q,
         "active_tab": "events",
     })
 

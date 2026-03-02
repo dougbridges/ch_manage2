@@ -9,6 +9,9 @@
         <i class="fa fa-calendar-days mr-1"></i> {% translate "Calendar" %}
       </a>
       {% if request.team_membership.role != 'member' %}
+      <a href="{% url 'events:export_events' team.slug %}" class="btn btn-outline btn-sm">
+        <i class="fa fa-download mr-1"></i> {% translate "Export CSV" %}
+      </a>
       <a href="{% url 'events:event_create' team.slug %}" class="btn btn-primary btn-sm">
         <i class="fa fa-plus mr-1"></i> {% translate "New Event" %}
       </a>
@@ -16,16 +19,53 @@
     </div>
   </div>
 
+  {# ── Filter Bar ── #}
+  <form method="get" class="card bg-base-100 shadow-sm mb-6">
+    <div class="card-body py-3">
+      <div class="flex flex-wrap gap-3 items-end">
+        <div class="form-control w-48">
+          <label class="label py-0"><span class="label-text text-xs">{% translate "Search" %}</span></label>
+          <input type="text" name="q" value="{{ filter_q }}" placeholder="{% translate 'Event title…' %}"
+                 class="input input-bordered input-sm w-full">
+        </div>
+        <div class="form-control w-40">
+          <label class="label py-0"><span class="label-text text-xs">{% translate "Category" %}</span></label>
+          <select name="category" class="select select-bordered select-sm w-full">
+            <option value="">{% translate "All" %}</option>
+            {% for value, label in categories %}
+              <option value="{{ value }}" {% if filter_category == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-control w-40">
+          <label class="label py-0"><span class="label-text text-xs">{% translate "From" %}</span></label>
+          <input type="date" name="date_from" value="{{ filter_date_from }}" class="input input-bordered input-sm w-full">
+        </div>
+        <div class="form-control w-40">
+          <label class="label py-0"><span class="label-text text-xs">{% translate "To" %}</span></label>
+          <input type="date" name="date_to" value="{{ filter_date_to }}" class="input input-bordered input-sm w-full">
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="fa fa-search"></i> {% translate "Filter" %}
+        </button>
+        {% if filter_q or filter_category or filter_date_from or filter_date_to %}
+          <a href="{% url 'events:event_list' team.slug %}" class="btn btn-ghost btn-sm">{% translate "Clear" %}</a>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+
   {% if events %}
   <div class="grid gap-4">
     {% for event in events %}
       {% include "events/components/event_card.html" with event=event %}
     {% endfor %}
   </div>
+  {% include "web/components/pagination.html" %}
   {% else %}
   <div class="text-center py-12">
     <i class="fa fa-calendar-xmark text-4xl text-base-content/30 mb-4"></i>
-    <p class="text-base-content/60">{% translate "No upcoming events." %}</p>
+    <p class="text-base-content/60">{% translate "No events found." %}</p>
   </div>
   {% endif %}
 </div>

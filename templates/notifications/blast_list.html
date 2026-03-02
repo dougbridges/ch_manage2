@@ -16,16 +16,54 @@
     </div>
   </div>
 
+  {# ── Filter Bar ── #}
+  <form method="get" class="card bg-base-100 shadow-sm mb-6">
+    <div class="card-body py-3">
+      <div class="flex flex-wrap gap-3 items-end">
+        <div class="form-control w-48">
+          <label class="label py-0"><span class="label-text text-xs">{% translate "Search" %}</span></label>
+          <input type="text" name="q" value="{{ filter_q }}" placeholder="{% translate 'Subject…' %}"
+                 class="input input-bordered input-sm w-full">
+        </div>
+        <div class="form-control w-36">
+          <label class="label py-0"><span class="label-text text-xs">{% translate "Status" %}</span></label>
+          <select name="status" class="select select-bordered select-sm w-full">
+            <option value="">{% translate "All" %}</option>
+            {% for value, label in statuses %}
+              <option value="{{ value }}" {% if filter_status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-control w-36">
+          <label class="label py-0"><span class="label-text text-xs">{% translate "Channel" %}</span></label>
+          <select name="channel" class="select select-bordered select-sm w-full">
+            <option value="">{% translate "All" %}</option>
+            {% for value, label in channels %}
+              <option value="{{ value }}" {% if filter_channel == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="fa fa-search"></i> {% translate "Filter" %}
+        </button>
+        {% if filter_q or filter_status or filter_channel %}
+          <a href="{% url 'notifications:blast_list' team.slug %}" class="btn btn-ghost btn-sm">{% translate "Clear" %}</a>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+
   {% if blasts %}
   <div class="grid gap-4">
     {% for blast in blasts %}
       {% include "notifications/components/blast_card.html" with blast=blast %}
     {% endfor %}
   </div>
+  {% include "web/components/pagination.html" %}
   {% else %}
   <div class="text-center py-12">
     <i class="fa fa-bell-slash text-4xl text-base-content/30 mb-4"></i>
-    <p class="text-base-content/60">{% translate "No blasts sent yet." %}</p>
+    <p class="text-base-content/60">{% translate "No blasts found." %}</p>
   </div>
   {% endif %}
 </div>

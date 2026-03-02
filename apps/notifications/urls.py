@@ -6,7 +6,7 @@ All patterns are team-scoped and mounted at /a/<team_slug>/notifications/.
 
 from django.urls import path
 
-from . import views
+from . import exports, views
 
 app_name = "notifications"
 
@@ -15,5 +15,6 @@ team_urlpatterns = [
     path("compose/", views.blast_compose, name="blast_compose"),
     path("<int:pk>/", views.blast_detail, name="blast_detail"),
     path("<int:pk>/send/", views.blast_send, name="blast_send"),
+    path("<int:pk>/export/", exports.export_blast_report, name="export_blast_report"),
     path("preferences/", views.contact_preferences, name="contact_preferences"),
 ]

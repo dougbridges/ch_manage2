@@ -5,11 +5,41 @@
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold">{% translate "Volunteers" %}</h1>
     <div class="flex gap-2">
+      <a href="{% url 'volunteers:export_roster' team.slug %}" class="btn btn-outline btn-sm">
+        <i class="fa fa-download mr-1"></i> {% translate "Export CSV" %}
+      </a>
       <a href="{% url 'volunteers:rotation_list' team.slug %}" class="btn btn-outline btn-sm">
         <i class="fa fa-sync mr-1"></i> {% translate "Rotations" %}
       </a>
     </div>
   </div>
+
+  {# ── Filter Bar ── #}
+  <form method="get" class="card bg-base-100 shadow-sm mb-6">
+    <div class="card-body py-3">
+      <div class="flex flex-wrap gap-3 items-end">
+        <div class="form-control w-52">
+          <label class="label py-0"><span class="label-text text-xs">{% translate "Search" %}</span></label>
+          <input type="text" name="q" value="{{ filter_q }}" placeholder="{% translate 'Name or email…' %}"
+                 class="input input-bordered input-sm w-full">
+        </div>
+        <div class="form-control w-36">
+          <label class="label py-0"><span class="label-text text-xs">{% translate "Status" %}</span></label>
+          <select name="active" class="select select-bordered select-sm w-full">
+            <option value="">{% translate "All" %}</option>
+            <option value="yes" {% if filter_active == "yes" %}selected{% endif %}>{% translate "Active" %}</option>
+            <option value="no" {% if filter_active == "no" %}selected{% endif %}>{% translate "Inactive" %}</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="fa fa-search"></i> {% translate "Filter" %}
+        </button>
+        {% if filter_q or filter_active %}
+          <a href="{% url 'volunteers:volunteer_list' team.slug %}" class="btn btn-ghost btn-sm">{% translate "Clear" %}</a>
+        {% endif %}
+      </div>
+    </div>
+  </form>
 
   {% if profiles %}
   <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -17,10 +47,11 @@
       {% include "volunteers/components/volunteer_card.html" with profile=profile %}
     {% endfor %}
   </div>
+  {% include "web/components/pagination.html" %}
   {% else %}
   <div class="text-center py-12">
     <i class="fa fa-users text-4xl text-base-content/30 mb-4"></i>
-    <p class="text-base-content/60">{% translate "No volunteer profiles yet." %}</p>
+    <p class="text-base-content/60">{% translate "No volunteers found." %}</p>
   </div>
   {% endif %}
 </div>

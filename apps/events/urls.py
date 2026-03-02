@@ -6,7 +6,7 @@ All patterns are team-scoped and mounted at /a/<team_slug>/events/.
 
 from django.urls import path
 
-from . import calendar_views, slot_views, views
+from . import calendar_views, exports, slot_views, views
 
 app_name = "events"
 
@@ -28,4 +28,7 @@ team_urlpatterns = [
     # Signup / cancel
     path("<int:event_pk>/slots/<int:slot_pk>/signup/", slot_views.slot_signup, name="slot_signup"),
     path("<int:event_pk>/slots/<int:slot_pk>/cancel/", slot_views.slot_cancel_signup, name="slot_cancel_signup"),
+    # Exports
+    path("export/", exports.export_events_list, name="export_events"),
+    path("<int:pk>/export-signups/", exports.export_event_signups, name="export_event_signups"),
 ]

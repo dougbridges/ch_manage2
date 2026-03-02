@@ -35,6 +35,9 @@ class VolunteerProfile(BaseTeamModel):
         unique_together = ["team", "user"]
         verbose_name = _("volunteer profile")
         verbose_name_plural = _("volunteer profiles")
+        indexes = [
+            models.Index(fields=["team", "is_active"], name="volprofile_team_active"),
+        ]
 
     def __str__(self) -> str:
         return f"{self.user} — {self.team}"
@@ -205,6 +208,11 @@ class ScheduledShift(BaseTeamModel):
         ordering = ["date"]
         verbose_name = _("scheduled shift")
         verbose_name_plural = _("scheduled shifts")
+        indexes = [
+            models.Index(fields=["volunteer", "date"], name="shift_volunteer_date"),
+            models.Index(fields=["date", "status"], name="shift_date_status"),
+            models.Index(fields=["date", "reminder_sent"], name="shift_date_reminder"),
+        ]
 
     def __str__(self) -> str:
         return f"{self.volunteer.user} — {self.schedule.name} on {self.date}"

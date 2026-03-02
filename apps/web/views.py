@@ -1,8 +1,12 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib import messages
+from django.db.models import Count, Q
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from health_check.views import MainView
 
@@ -31,7 +35,71 @@ def home(request):
 
 @login_and_team_required
 def team_home(request, team_slug):
+    """Church dashboard with upcoming events, shifts, recent blasts, and stats."""
     assert request.team.slug == team_slug
+    now = timezone.now()
+    week_ahead = now + timedelta(days=7)
+
+    # Upcoming events (next 7 days)
+    from apps.events.models import Event
+
+    upcoming_events = (
+        Event.objects.filter(
+            team=request.team,
+            is_published=True,
+            start_datetime__gte=now,
+            start_datetime__lte=week_ahead,
+        )
+        .prefetch_related("volunteer_slots")
+        .order_by("start_datetime")[:5]
+    )
+
+    # My upcoming volunteer shifts (next 14 days)
+    my_shifts = []
+    try:
+        from apps.volunteers.models import ScheduledShift, ShiftStatus, VolunteerProfile
+
+        profile = VolunteerProfile.objects.filter(team=request.team, user=request.user).first()
+        if profile:
+            my_shifts = (
+                ScheduledShift.objects.filter(
+                    volunteer=profile,
+                    date__gte=now.date(),
+                    date__lte=(now + timedelta(days=14)).date(),
+                )
+                .exclude(status=ShiftStatus.DECLINED)
+                .select_related("schedule", "event")
+                .order_by("date")[:5]
+            )
+    except ImportError:
+        pass
+
+    # Recent blasts (last 5)
+    recent_blasts = []
+    try:
+        from apps.notifications.models import MessageBlast
+
+        recent_blasts = MessageBlast.objects.filter(team=request.team).order_by("-created_at")[:5]
+    except ImportError:
+        pass
+
+    # Quick stats
+    total_events = Event.objects.filter(
+        team=request.team,
+        is_published=True,
+        start_datetime__gte=now,
+    ).count()
+
+    total_volunteers = 0
+    try:
+        total_volunteers = VolunteerProfile.objects.filter(team=request.team, is_active=True).count()
+    except NameError:
+        pass
+
+    from apps.teams.models import Membership
+
+    total_members = Membership.objects.filter(team=request.team).count()
+
     return render(
         request,
         "web/app_home.html",
@@ -39,6 +107,12 @@ def team_home(request, team_slug):
             "team": request.team,
             "active_tab": "dashboard",
             "page_title": _("{team} Dashboard").format(team=request.team),
+            "upcoming_events": upcoming_events,
+            "my_shifts": my_shifts,
+            "recent_blasts": recent_blasts,
+            "total_events": total_events,
+            "total_volunteers": total_volunteers,
+            "total_members": total_members,
         },
     )
 
