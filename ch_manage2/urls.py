@@ -58,6 +58,10 @@ urlpatterns = [
     path("", include("apps.web.urls")),
     path("support/", include("apps.support.urls")),
     path("celery-progress/", include("celery_progress.urls")),
+    # API endpoints (team-scoped)
+    path("api/a/<slug:team_slug>/events/", include("apps.events.api_urls")),
+    path("api/a/<slug:team_slug>/volunteers/", include("apps.volunteers.api_urls")),
+    path("api/a/<slug:team_slug>/notifications/", include("apps.notifications.api_urls")),
     # API docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI - you may wish to remove one of these depending on your preference
