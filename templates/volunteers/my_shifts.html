@@ -1,0 +1,35 @@
+{% extends "web/app/app_base.html" %}
+{% load i18n %}
+{% block app %}
+<div class="px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">{% translate "My Shifts" %}</h1>
+    <div class="flex gap-2">
+      <a href="{% url 'volunteers:my_volunteer_profile' team.slug %}" class="btn btn-outline btn-sm">
+        <i class="fa fa-user mr-1"></i> {% translate "My Profile" %}
+      </a>
+      <a href="{% url 'volunteers:my_availability' team.slug %}" class="btn btn-outline btn-sm">
+        <i class="fa fa-calendar-xmark mr-1"></i> {% translate "Availability" %}
+      </a>
+    </div>
+  </div>
+
+  {% if shifts %}
+  <div class="grid gap-3">
+    {% for shift in shifts %}
+      {% include "volunteers/components/shift_card.html" with shift=shift show_actions=True %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-12">
+    <i class="fa fa-calendar-check text-4xl text-base-content/30 mb-4"></i>
+    <p class="text-base-content/60">{% translate "No upcoming shifts scheduled." %}</p>
+    {% if not profile %}
+    <a href="{% url 'volunteers:my_volunteer_profile' team.slug %}" class="btn btn-primary btn-sm mt-4">
+      {% translate "Create Volunteer Profile" %}
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

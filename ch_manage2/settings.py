@@ -86,6 +86,7 @@ PROJECT_APPS = [
     "apps.ai.apps.AiConfig",
     "apps.events.apps.EventsConfig",
     "apps.notifications.apps.NotificationsConfig",
+    "apps.volunteers.apps.VolunteersConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
@@ -436,6 +437,14 @@ SCHEDULED_TASKS: dict[str, Any] = {
     "send-scheduled-blasts": {
         "task": "apps.notifications.tasks.send_scheduled_blasts",
         "schedule": 300,  # every 5 minutes
+    },
+    "send-shift-reminders": {
+        "task": "apps.volunteers.tasks.send_shift_reminders",
+        "schedule": 28800,  # daily (8 hours)
+    },
+    "auto-generate-rotations": {
+        "task": "apps.volunteers.tasks.auto_generate_rotations",
+        "schedule": 604800,  # weekly
     },
 }
 

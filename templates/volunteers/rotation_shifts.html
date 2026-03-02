@@ -1,0 +1,48 @@
+{% extends "web/app/app_base.html" %}
+{% load i18n %}
+{% block app %}
+<div class="px-4 py-6">
+  <div class="text-sm breadcrumbs mb-4">
+    <ul>
+      <li><a href="{% url 'volunteers:rotation_list' team.slug %}">{% translate "Rotations" %}</a></li>
+      <li><a href="{% url 'volunteers:rotation_detail' team.slug rotation.pk %}">{{ rotation.name }}</a></li>
+      <li>{% translate "All Shifts" %}</li>
+    </ul>
+  </div>
+
+  <h1 class="text-2xl font-bold mb-6">{{ rotation.name }} — {% translate "Shifts" %}</h1>
+
+  {% if shifts %}
+  <div class="overflow-x-auto">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>{% translate "Date" %}</th>
+          <th>{% translate "Volunteer" %}</th>
+          <th>{% translate "Status" %}</th>
+          <th>{% translate "Reminder" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for shift in shifts %}
+        <tr>
+          <td>{{ shift.date|date:"N j, Y" }}</td>
+          <td>{{ shift.volunteer.user.get_display_name }}</td>
+          <td>{% include "volunteers/components/shift_status_badge.html" with status=shift.status %}</td>
+          <td>
+            {% if shift.reminder_sent %}
+            <span class="badge badge-sm badge-success">{% translate "Sent" %}</span>
+            {% else %}
+            <span class="badge badge-sm badge-ghost">{% translate "Pending" %}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-base-content/60">{% translate "No shifts generated yet." %}</p>
+  {% endif %}
+</div>
+{% endblock %}

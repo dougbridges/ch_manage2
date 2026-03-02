@@ -1,0 +1,57 @@
+{% load i18n %}
+{# Calendar-style availability picker with HTMX toggle #}
+<div class="card bg-base-200">
+  <div class="card-body p-4">
+    <div class="flex justify-between items-center mb-4">
+      <a href="?year={{ prev_year }}&month={{ prev_month }}"
+         hx-get="{% url 'volunteers:my_availability' team.slug %}?year={{ prev_year }}&month={{ prev_month }}"
+         hx-target="#availability-calendar"
+         class="btn btn-ghost btn-sm">
+        <i class="fa fa-chevron-left"></i>
+      </a>
+      <span class="font-semibold text-lg">{{ month_name }} {{ year }}</span>
+      <a href="?year={{ next_year }}&month={{ next_month }}"
+         hx-get="{% url 'volunteers:my_availability' team.slug %}?year={{ next_year }}&month={{ next_month }}"
+         hx-target="#availability-calendar"
+         class="btn btn-ghost btn-sm">
+        <i class="fa fa-chevron-right"></i>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-7 gap-1 text-center text-sm">
+      <div class="font-medium text-base-content/60">{% translate "Sun" %}</div>
+      <div class="font-medium text-base-content/60">{% translate "Mon" %}</div>
+      <div class="font-medium text-base-content/60">{% translate "Tue" %}</div>
+      <div class="font-medium text-base-content/60">{% translate "Wed" %}</div>
+      <div class="font-medium text-base-content/60">{% translate "Thu" %}</div>
+      <div class="font-medium text-base-content/60">{% translate "Fri" %}</div>
+      <div class="font-medium text-base-content/60">{% translate "Sat" %}</div>
+
+      {% for week in month_days %}
+        {% for day in week %}
+          {% if day == 0 %}
+          <div></div>
+          {% else %}
+          {% with day_date=year|stringformat:"04d" %}
+          <form method="post"
+                hx-post="{% url 'volunteers:my_availability' team.slug %}?year={{ year }}&month={{ month }}"
+                hx-target="#availability-calendar">
+            {% csrf_token %}
+            <input type="hidden" name="date" value="{{ year }}-{{ month|stringformat:'02d' }}-{{ day|stringformat:'02d' }}">
+            <button type="submit"
+                    class="btn btn-sm w-full {% if day|stringformat:'02d' in blackout_dates_str %}btn-error{% else %}btn-ghost{% endif %}">
+              {{ day }}
+            </button>
+          </form>
+          {% endwith %}
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+    <div class="flex items-center gap-4 mt-4 text-sm text-base-content/60">
+      <span><span class="badge badge-ghost badge-xs"></span> {% translate "Available" %}</span>
+      <span><span class="badge badge-error badge-xs"></span> {% translate "Unavailable" %}</span>
+    </div>
+  </div>
+</div>

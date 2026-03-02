@@ -1,0 +1,210 @@
+"""
+Volunteer scheduling models for Planning Center Lite.
+
+Defines volunteer profiles, availability blackout dates, rotation schedules
+with configurable strategies, rotation membership, and scheduled shifts.
+"""
+
+from django.conf import settings
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+from apps.teams.models import BaseTeamModel
+
+
+class VolunteerProfile(BaseTeamModel):
+    """
+    A team member's volunteer profile.
+
+    Tracks skills, scheduling limits, and active status.
+    Each user has one profile per team.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("user"),
+        on_delete=models.CASCADE,
+        related_name="volunteer_profiles",
+    )
+    skills = models.JSONField(_("skills"), default=list, blank=True)
+    max_services_per_month = models.PositiveIntegerField(_("max services per month"), default=4)
+    is_active = models.BooleanField(_("active"), default=True)
+    notes = models.TextField(_("notes"), blank=True)
+
+    class Meta:
+        unique_together = ["team", "user"]
+        verbose_name = _("volunteer profile")
+        verbose_name_plural = _("volunteer profiles")
+
+    def __str__(self) -> str:
+        return f"{self.user} — {self.team}"
+
+
+class Availability(BaseTeamModel):
+    """
+    A blackout date for a volunteer.
+
+    When is_available is False, the volunteer cannot be scheduled on that date.
+    """
+
+    volunteer = models.ForeignKey(
+        VolunteerProfile,
+        verbose_name=_("volunteer"),
+        on_delete=models.CASCADE,
+        related_name="availabilities",
+    )
+    date = models.DateField(_("date"))
+    is_available = models.BooleanField(_("available"), default=False)
+    note = models.CharField(_("note"), max_length=200, blank=True)
+
+    class Meta:
+        unique_together = ["volunteer", "date"]
+        ordering = ["date"]
+        verbose_name = _("availability")
+        verbose_name_plural = _("availabilities")
+
+    def __str__(self) -> str:
+        status = "available" if self.is_available else "unavailable"
+        return f"{self.volunteer.user} — {self.date} ({status})"
+
+
+class RotationStrategy(models.TextChoices):
+    """Strategy for generating rotation shifts."""
+
+    ROUND_ROBIN = "round_robin", _("Round Robin")
+    WEIGHTED = "weighted", _("Weighted")
+    MANUAL = "manual", _("Manual")
+
+
+class RotationSchedule(BaseTeamModel):
+    """
+    A rotation schedule that automatically assigns volunteers to shifts.
+
+    Links to a recurring event and specific volunteer slot role, then uses
+    the chosen strategy to generate shift assignments.
+    """
+
+    name = models.CharField(_("name"), max_length=200)
+    event = models.ForeignKey(
+        "events.Event",
+        verbose_name=_("event"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rotation_schedules",
+    )
+    slot_role_name = models.CharField(_("slot role name"), max_length=100)
+    rotation_strategy = models.CharField(
+        _("rotation strategy"),
+        max_length=20,
+        choices=RotationStrategy.choices,
+        default=RotationStrategy.ROUND_ROBIN,
+    )
+    volunteers = models.ManyToManyField(
+        VolunteerProfile,
+        through="RotationMembership",
+        verbose_name=_("volunteers"),
+        related_name="rotation_schedules",
+    )
+    is_active = models.BooleanField(_("active"), default=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("rotation schedule")
+        verbose_name_plural = _("rotation schedules")
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class RotationMembership(BaseTeamModel):
+    """
+    Through model linking a volunteer to a rotation schedule.
+
+    Stores ordering (for round-robin) and weight (for weighted scheduling).
+    """
+
+    schedule = models.ForeignKey(
+        RotationSchedule,
+        verbose_name=_("schedule"),
+        on_delete=models.CASCADE,
+        related_name="memberships",
+    )
+    volunteer = models.ForeignKey(
+        VolunteerProfile,
+        verbose_name=_("volunteer"),
+        on_delete=models.CASCADE,
+        related_name="rotation_memberships",
+    )
+    order = models.PositiveIntegerField(_("order"), default=0)
+    weight = models.PositiveIntegerField(_("weight"), default=1)
+
+    class Meta:
+        unique_together = ["schedule", "volunteer"]
+        ordering = ["order"]
+        verbose_name = _("rotation membership")
+        verbose_name_plural = _("rotation memberships")
+
+    def __str__(self) -> str:
+        return f"{self.volunteer.user} in {self.schedule} (order={self.order})"
+
+
+class ShiftStatus(models.TextChoices):
+    """Status of a scheduled shift."""
+
+    SCHEDULED = "scheduled", _("Scheduled")
+    CONFIRMED = "confirmed", _("Confirmed")
+    DECLINED = "declined", _("Declined")
+    SWAPPED = "swapped", _("Swapped")
+
+
+class ScheduledShift(BaseTeamModel):
+    """
+    A single shift assignment for a volunteer on a specific date.
+
+    Generated by the rotation engine or created manually by coordinators.
+    """
+
+    schedule = models.ForeignKey(
+        RotationSchedule,
+        verbose_name=_("schedule"),
+        on_delete=models.CASCADE,
+        related_name="shifts",
+    )
+    volunteer = models.ForeignKey(
+        VolunteerProfile,
+        verbose_name=_("volunteer"),
+        on_delete=models.CASCADE,
+        related_name="scheduled_shifts",
+    )
+    event = models.ForeignKey(
+        "events.Event",
+        verbose_name=_("event"),
+        on_delete=models.CASCADE,
+        related_name="scheduled_shifts",
+    )
+    slot = models.ForeignKey(
+        "events.VolunteerSlot",
+        verbose_name=_("slot"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="scheduled_shifts",
+    )
+    date = models.DateField(_("date"))
+    status = models.CharField(
+        _("status"),
+        max_length=20,
+        choices=ShiftStatus.choices,
+        default=ShiftStatus.SCHEDULED,
+    )
+    reminder_sent = models.BooleanField(_("reminder sent"), default=False)
+
+    class Meta:
+        unique_together = ["schedule", "volunteer", "date"]
+        ordering = ["date"]
+        verbose_name = _("scheduled shift")
+        verbose_name_plural = _("scheduled shifts")
+
+    def __str__(self) -> str:
+        return f"{self.volunteer.user} — {self.schedule.name} on {self.date}"

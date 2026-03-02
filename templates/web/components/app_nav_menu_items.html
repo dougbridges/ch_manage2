@@ -37,6 +37,12 @@
     {% translate "Notifications" %}
   </a>
 </li>
+<li>
+  <a href="{% url 'volunteers:my_shifts' team.slug %}" {% if active_tab == 'volunteers' %}class="menu-active"{% endif %}>
+    <i class="fa fa-hand-holding-heart h-4 w-4"></i>
+    {% translate "Volunteers" %}
+  </a>
+</li>
 {% endif %}
 {% if not user.is_anonymous %}
 <li class="menu-title">

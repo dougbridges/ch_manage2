@@ -1,0 +1,27 @@
+{% extends "web/app/app_base.html" %}
+{% load i18n %}
+{% block app %}
+<div class="px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">{% translate "Volunteers" %}</h1>
+    <div class="flex gap-2">
+      <a href="{% url 'volunteers:rotation_list' team.slug %}" class="btn btn-outline btn-sm">
+        <i class="fa fa-sync mr-1"></i> {% translate "Rotations" %}
+      </a>
+    </div>
+  </div>
+
+  {% if profiles %}
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {% for profile in profiles %}
+      {% include "volunteers/components/volunteer_card.html" with profile=profile %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-12">
+    <i class="fa fa-users text-4xl text-base-content/30 mb-4"></i>
+    <p class="text-base-content/60">{% translate "No volunteer profiles yet." %}</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

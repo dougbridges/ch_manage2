@@ -1,0 +1,11 @@
+{% load i18n %}
+{# Status badge for a shift #}
+{% if status == 'scheduled' %}
+<span class="badge badge-sm badge-info">{% translate "Scheduled" %}</span>
+{% elif status == 'confirmed' %}
+<span class="badge badge-sm badge-success">{% translate "Confirmed" %}</span>
+{% elif status == 'declined' %}
+<span class="badge badge-sm badge-error">{% translate "Declined" %}</span>
+{% elif status == 'swapped' %}
+<span class="badge badge-sm badge-warning">{% translate "Swapped" %}</span>
+{% endif %}

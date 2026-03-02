@@ -1,0 +1,42 @@
+{% load i18n %}
+{# Shift card with optional confirm/decline buttons #}
+<div class="card bg-base-200" id="shift-{{ shift.pk }}">
+  <div class="card-body p-4 flex-row justify-between items-center">
+    <div>
+      <div class="font-semibold">{{ shift.schedule.name }}</div>
+      <div class="text-sm text-base-content/60">
+        <i class="fa fa-calendar mr-1"></i> {{ shift.date|date:"l, N j, Y" }}
+        {% if shift.event %}
+        <span class="ml-2"><i class="fa fa-map-marker-alt mr-1"></i> {{ shift.event.title }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      {% include "volunteers/components/shift_status_badge.html" with status=shift.status %}
+      {% if show_actions %}
+        {% if shift.status == 'scheduled' or shift.status == 'declined' %}
+        <form method="post" action="{% url 'volunteers:shift_confirm' team.slug shift.pk %}"
+              hx-post="{% url 'volunteers:shift_confirm' team.slug shift.pk %}"
+              hx-target="#shift-{{ shift.pk }}"
+              hx-swap="outerHTML">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success btn-sm">
+            <i class="fa fa-check mr-1"></i> {% translate "Confirm" %}
+          </button>
+        </form>
+        {% endif %}
+        {% if shift.status == 'scheduled' or shift.status == 'confirmed' %}
+        <form method="post" action="{% url 'volunteers:shift_decline' team.slug shift.pk %}"
+              hx-post="{% url 'volunteers:shift_decline' team.slug shift.pk %}"
+              hx-target="#shift-{{ shift.pk }}"
+              hx-swap="outerHTML">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-error btn-sm btn-outline">
+            <i class="fa fa-times mr-1"></i> {% translate "Decline" %}
+          </button>
+        </form>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,62 @@
+{% extends "web/app/app_base.html" %}
+{% load i18n %}
+{% block app %}
+<div class="px-4 py-6 max-w-2xl">
+  <div class="text-sm breadcrumbs mb-4">
+    <ul>
+      <li><a href="{% url 'volunteers:rotation_list' team.slug %}">{% translate "Rotations" %}</a></li>
+      <li>{% if rotation %}{% translate "Edit" %}{% else %}{% translate "New Rotation" %}{% endif %}</li>
+    </ul>
+  </div>
+
+  <h1 class="text-2xl font-bold mb-6">
+    {% if rotation %}{% translate "Edit Rotation Schedule" %}{% else %}{% translate "New Rotation Schedule" %}{% endif %}
+  </h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-error mb-4">
+      {% for error in form.non_field_errors %}
+      <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% for field in form %}
+    <div class="form-control mb-4">
+      {% if field.field.widget.input_type == 'checkbox' %}
+      <label class="label cursor-pointer justify-start gap-3">
+        {{ field }}
+        <span class="label-text">{{ field.label }}</span>
+      </label>
+      {% else %}
+      <label class="label" for="{{ field.id_for_label }}">
+        <span class="label-text font-medium">{{ field.label }}</span>
+      </label>
+      {{ field }}
+      {% endif %}
+      {% if field.errors %}
+      <label class="label">
+        {% for error in field.errors %}
+        <span class="label-text-alt text-error">{{ error }}</span>
+        {% endfor %}
+      </label>
+      {% endif %}
+      {% if field.help_text %}
+      <label class="label">
+        <span class="label-text-alt">{{ field.help_text }}</span>
+      </label>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="flex gap-2 mt-6">
+      <button type="submit" class="btn btn-primary">
+        {% if rotation %}{% translate "Save Changes" %}{% else %}{% translate "Create Rotation" %}{% endif %}
+      </button>
+      <a href="{% url 'volunteers:rotation_list' team.slug %}" class="btn btn-ghost">{% translate "Cancel" %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

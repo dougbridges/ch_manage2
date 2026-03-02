@@ -1,0 +1,29 @@
+{% load i18n %}
+{# Volunteer summary card #}
+<div class="card bg-base-200">
+  <div class="card-body p-4">
+    <div class="flex justify-between items-start">
+      <div>
+        <a href="{% url 'volunteers:volunteer_profile_detail' team.slug profile.pk %}" class="font-semibold link link-hover">
+          {{ profile.user.get_display_name }}
+        </a>
+        <p class="text-sm text-base-content/60">{{ profile.user.email }}</p>
+      </div>
+      {% if profile.is_active %}
+      <span class="badge badge-success badge-sm">{% translate "Active" %}</span>
+      {% else %}
+      <span class="badge badge-ghost badge-sm">{% translate "Inactive" %}</span>
+      {% endif %}
+    </div>
+    {% if profile.skills %}
+    <div class="flex flex-wrap gap-1 mt-2">
+      {% for skill in profile.skills %}
+      <span class="badge badge-outline badge-sm">{{ skill }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="text-sm text-base-content/60 mt-2">
+      {% translate "Max" %}: {{ profile.max_services_per_month }}/{% translate "month" %}
+    </div>
+  </div>
+</div>

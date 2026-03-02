@@ -1,0 +1,38 @@
+{% load i18n %}
+{# List of rotation members with order and weight #}
+{% if memberships %}
+<div class="overflow-x-auto">
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th>{% translate "Order" %}</th>
+        <th>{% translate "Volunteer" %}</th>
+        <th>{% translate "Weight" %}</th>
+        <th>{% translate "Status" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in memberships %}
+      <tr>
+        <td>{{ m.order }}</td>
+        <td>
+          <a href="{% url 'volunteers:volunteer_profile_detail' team.slug m.volunteer.pk %}" class="link link-hover">
+            {{ m.volunteer.user.get_display_name }}
+          </a>
+        </td>
+        <td>{{ m.weight }}</td>
+        <td>
+          {% if m.volunteer.is_active %}
+          <span class="badge badge-success badge-sm">{% translate "Active" %}</span>
+          {% else %}
+          <span class="badge badge-ghost badge-sm">{% translate "Inactive" %}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-base-content/60">{% translate "No members assigned yet. Add volunteers via the admin." %}</p>
+{% endif %}

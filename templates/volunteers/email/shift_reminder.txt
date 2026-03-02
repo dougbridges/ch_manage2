@@ -1,0 +1,14 @@
+Shift Reminder
+
+Hi {{ user.get_display_name }},
+
+This is a reminder about your upcoming shift:
+
+{{ shift.schedule.name }}
+Date: {{ shift.date }}
+{% if shift.event %}Event: {{ shift.event.title }}{% endif %}
+
+Please log in to confirm or decline your shift.
+
+--
+You received this reminder from {{ shift.schedule.team }}.

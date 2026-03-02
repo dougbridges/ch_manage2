@@ -1,0 +1,79 @@
+{% extends "web/app/app_base.html" %}
+{% load i18n %}
+{% block app %}
+<div class="px-4 py-6">
+  <div class="text-sm breadcrumbs mb-4">
+    <ul>
+      <li><a href="{% url 'volunteers:rotation_list' team.slug %}">{% translate "Rotations" %}</a></li>
+      <li>{{ rotation.name }}</li>
+    </ul>
+  </div>
+
+  <div class="flex justify-between items-start mb-6">
+    <div>
+      <h1 class="text-2xl font-bold">{{ rotation.name }}</h1>
+      <div class="flex items-center gap-3 mt-2 text-sm text-base-content/60">
+        <span class="badge badge-outline">{{ rotation.get_rotation_strategy_display }}</span>
+        {% if rotation.event %}
+        <span><i class="fa fa-calendar mr-1"></i> {{ rotation.event.title }}</span>
+        {% endif %}
+        <span>{{ rotation.slot_role_name }}</span>
+        {% if rotation.is_active %}
+        <span class="badge badge-success badge-sm">{% translate "Active" %}</span>
+        {% else %}
+        <span class="badge badge-ghost badge-sm">{% translate "Inactive" %}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <a href="{% url 'volunteers:rotation_edit' team.slug rotation.pk %}" class="btn btn-outline btn-sm">
+        <i class="fa fa-edit mr-1"></i> {% translate "Edit" %}
+      </a>
+      <a href="{% url 'volunteers:rotation_shifts' team.slug rotation.pk %}" class="btn btn-outline btn-sm">
+        <i class="fa fa-list mr-1"></i> {% translate "All Shifts" %}
+      </a>
+    </div>
+  </div>
+
+  {# Generate shifts form #}
+  <div class="card bg-base-200 mb-6">
+    <div class="card-body p-4">
+      <h3 class="font-semibold mb-3">{% translate "Generate Shifts" %}</h3>
+      <form method="post" action="{% url 'volunteers:rotation_generate' team.slug rotation.pk %}" class="flex flex-wrap items-end gap-3">
+        {% csrf_token %}
+        <div class="form-control">
+          <label class="label"><span class="label-text">{% translate "Start Date" %}</span></label>
+          <input type="date" name="start_date" class="input input-bordered input-sm" required>
+        </div>
+        <div class="form-control">
+          <label class="label"><span class="label-text">{% translate "End Date" %}</span></label>
+          <input type="date" name="end_date" class="input input-bordered input-sm" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="fa fa-magic mr-1"></i> {% translate "Generate" %}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {# Rotation members #}
+  <div class="mb-6">
+    <h3 class="font-semibold mb-3">{% translate "Members" %} ({{ memberships|length }})</h3>
+    {% include "volunteers/components/rotation_members.html" with memberships=memberships %}
+  </div>
+
+  {# Upcoming shifts #}
+  <div>
+    <h3 class="font-semibold mb-3">{% translate "Upcoming Shifts" %}</h3>
+    {% if upcoming_shifts %}
+    <div class="grid gap-2">
+      {% for shift in upcoming_shifts %}
+        {% include "volunteers/components/shift_card.html" with shift=shift show_actions=False %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-base-content/60">{% translate "No upcoming shifts. Use the Generate button above to create them." %}</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

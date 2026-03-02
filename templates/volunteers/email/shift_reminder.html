@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h2 style="margin-bottom: 16px;">Shift Reminder</h2>
+  <p>Hi {{ user.get_display_name }},</p>
+  <p>This is a reminder about your upcoming shift:</p>
+  <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+    <p><strong>{{ shift.schedule.name }}</strong></p>
+    <p>Date: {{ shift.date }}</p>
+    {% if shift.event %}
+    <p>Event: {{ shift.event.title }}</p>
+    {% endif %}
+  </div>
+  <p>Please log in to confirm or decline your shift.</p>
+  <hr style="margin-top: 32px; border: none; border-top: 1px solid #ddd;">
+  <p style="font-size: 12px; color: #999;">
+    You received this reminder from {{ shift.schedule.team }}.
+  </p>
+</body>
+</html>
